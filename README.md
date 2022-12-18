@@ -25,6 +25,6 @@ Almost everything I work on in open source, with the majority of it being either
 ## Me across the web
 I'm most active on Mastodon these days.
 
- - Mastodon: [@tojiro@mastodon.social](https://mastodon.social/@tojiro)
+ - Mastodon: <a rel="me" href="https://mastodon.social/@tojiro">@tojiro@mastodon.social</a>
  - Twitter: [@tojiro](https://twitter.com/Tojiro) - Used extensivley on the past, but moving away from it since late 2022
  - Personal Blog: [tojicode.com](https://tojicode.com) - (I post very rarely these days)
