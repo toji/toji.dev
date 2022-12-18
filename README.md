@@ -20,10 +20,11 @@ Almost everything I work on in open source, with the majority of it being either
  - [WebXR Samples](https://immersive-web.github.io/webxr-samples/) - Samples written to demonstrate the WebXR API.
  - [XR Dinosaurs](https://www.xrdinosaurs.com/) - Cute WebXR dinosaur experience.
  - [Spookyball](https://spookyball.com/) - Halloween-themed breakout clone. One of the first WebGPU games.
+ - [Efficiently rendering glTF with WebGPU](https://toji.github.io/webgpu-gltf-case-study/) - Article covering problems you may encounter when loading models with WebGPU and how to fix them.
 
-## Me on Social Media
+## Me across the web
 I'm most active on Mastodon these days.
 
  - Mastodon: [@tojiro@mastodon.social](https://mastodon.social/@tojiro)
- - Twitter: [@tojiro](https://twitter.com/Tojiro) - Used extensivley on the past, but movign away from it since late 2022
- - Personal Blog: [tojicode.com](https://tojicode.com) - (Mostly abandoned)
+ - Twitter: [@tojiro](https://twitter.com/Tojiro) - Used extensivley on the past, but moving away from it since late 2022
+ - Personal Blog: [tojicode.com](https://tojicode.com) - (I post very rarely these days)
