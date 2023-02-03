@@ -1,0 +1,16 @@
+- label: Me across the web
+  items:
+    - name: Mastodon
+      link: https://mastodon.social/@tojiro
+    - name: Twitter
+      link: https://twitter.com/Tojiro
+    - name: Github
+      link: https://github.com/toji
+    - name: Old Blog (abandoned)
+      link: http://tojicode.com/
+- label: Tech Writing
+  items:
+    - name: Articles
+      link: articles
+    - name: WebGPU Best Practices
+      link: webgpu-best-practices/
