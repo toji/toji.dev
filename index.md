@@ -1,7 +1,7 @@
 ---
 layout: page
-title: null
-hide_hero: true
+title: Toji.dev
+subtitle: Brandon Jones - Graphics and XR on the web
 show_sidebar: false
 menubar: home_menu
 ---
