@@ -1,6 +1,7 @@
 ---
 layout: page
-title: WebGPU Buffer upload best practices
+title: WebGPU Buffer Uploads
+subtitle: Best practices
 menubar_toc: true
 ---
 

@@ -8,7 +8,7 @@ menubar: home_menu
 
 # Hi!
 
-I'm Brandon Jones, frequently known by the username "toji" or "tojiro" on various parts of the web, and this is literally the lowest effort "About Me" page I could manage. I might make it fancier in the future, might not.
+I'm Brandon Jones, frequently known by the username "toji" or "tojiro" on various parts of the web, and this is my "About Me" page. I also host some of my tech writing about WebGPU and WebXR here.
 
 ## My Work
 I have been at Google on the Chrome team for 10+ years working on various Web APIs, including:

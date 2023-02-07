@@ -1,6 +1,7 @@
 ---
 layout: page
-title: WebGPU dynamic shader construction best practices
+title: WebGPU Dynamic Shader Construction
+subtitle: Best practices
 menubar_toc: true
 ---
 
