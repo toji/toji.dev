@@ -27,7 +27,7 @@ First we need to declare those values in the WGSL shader code, which would look 
 struct Camera {
   projection : matrix4x4<f32>,
   view : matrix4x4<f32>,
-  position: vec3<f32>,
+  position: vec3f,
 };
 @group(0) @binding(0) var<uniform> camera : Camera;
 
@@ -35,13 +35,13 @@ struct Camera {
 
 // The remainder of this shader doesn't affect the bind groups.
 struct VertexOutput {
-  @builtin(position) position : vec4<f32>,
-  @location(0) texcoord : vec2<f32>,
+  @builtin(position) position : vec4f,
+  @location(0) texcoord : vec2f,
 };
 
 @vertex fn vertexMain(
-    @location(0) position : vec3<f32>,
-    @location(1) texcoord : vec2<f32>) -> VertexOutput {
+    @location(0) position : vec3f,
+    @location(1) texcoord : vec2f) -> VertexOutput {
   var output : VertexOutput;
   output.position = camera.projection * camera.view * model * vec4(position, 1.0);
   output.texcoord = texcoord;
@@ -58,7 +58,7 @@ struct VertexOutput {
 
 // The remainder of this shader doesn't affect the bind groups.
 @fragment fn fragmentMain(
-    @location(0) texcoord : vec2<f32>) -> @location(0) vec4<f32> {
+    @location(0) texcoord : vec2f) -> @location(0) vec4f {
   return textureSample(baseColor, baseColorSampler, texcoord);
 }
 ```
@@ -256,7 +256,7 @@ To see why that's a problem, consider a scenario where we have a version of our 
 @group(0) @binding(3) var baseColorSampler : sampler;
 
 @fragment fn fragmentMain(
-    @location(0) texcoord : vec2<f32>) -> @location(0) vec4<f32> {
+    @location(0) texcoord : vec2f) -> @location(0) vec4f {
   return textureSample(baseColor, baseColorSampler, texcoord).bgra;
 }
 ```
@@ -326,13 +326,13 @@ Another consideration is that that when using `layout: 'auto'` the resulting bin
 // computeModuleA source:
 struct GlobalState {
   timeDelta : f32,
-  gravity : vec3<f32>
+  gravity : vec3f
 }
 @group(0) @binding(0) var<uniform> globalState : GlobalState;
 
 struct Particle {
-  pos : vec2<f32>,
-  vel : vec2<f32>,
+  pos : vec2f,
+  vel : vec2f,
 }
 @group(0) @binding(1) var<storage, read> particlesIn : array<Particle>;
 @group(0) @binding(2) var<storage, read_write> particlesOut : array<Particle>;
@@ -435,7 +435,7 @@ This pattern applies in scenarios where the resources used by a pipeline is only
 ```rust
 // fragmentModuleC source
 @fragment fn fragmentMain(
-    @location(0) texcoord : vec2<f32>) -> @location(0) vec4<f32> {
+    @location(0) texcoord : vec2f) -> @location(0) vec4f {
   return vec4<32f>(1.0, 0.0, 1.0, 1.0);
 }
 ```
@@ -534,26 +534,26 @@ This results in an updates shader that looks like this. Pay close attention to t
 // shaderModuleD source:
 
 struct Camera {
-  projection : matrix4x4<f32>,
-  view : matrix4x4<f32>,
-  position: vec3<f32>,
+  projection : matrix4x4f,
+  view : matrix4x4f,
+  position: vec3f,
 };
 @group(0) @binding(0) var<uniform> camera : Camera;
 
 @group(1) @binding(0) var baseColor : texture_2d<f32>;
 @group(1) @binding(1) var baseColorSampler : sampler;
 
-@group(2) @binding(0) var<uniform> model : matrix4x4<f32>;
+@group(2) @binding(0) var<uniform> model : matrix4x4f;
 
 // The remainder of this shader doesn't affect the bind groups.
 struct VertexOutput {
-  @builtin(position) position : vec4<f32>,
-  @location(0) texcoord : vec2<f32>,
+  @builtin(position) position : vec4f,
+  @location(0) texcoord : vec2f,
 };
 
 @vertex fn vertexMain(
-    @location(0) position : vec3<f32>,
-    @location(1) texcoord : vec2<f32>) -> VertexOutput {
+    @location(0) position : vec3f,
+    @location(1) texcoord : vec2f) -> VertexOutput {
   var output : VertexOutput;
   output.position = camera.projection * camera.view * model * vec4(position, 1.0);
   output.texcoord = texcoord;
@@ -562,7 +562,7 @@ struct VertexOutput {
 
 // The remainder of this shader doesn't affect the bind groups.
 @fragment fn fragmentMain(
-    @location(0) texcoord : vec2<f32>) -> @location(0) vec4<f32> {
+    @location(0) texcoord : vec2f) -> @location(0) vec4f {
   return textureSample(baseColor, baseColorSampler, texcoord);
 }
 ```
@@ -710,22 +710,22 @@ For example, let's take another look at the shader above that didn't make use of
 // shaderModuleE source:
 
 struct Camera {
-  projection : matrix4x4<f32>,
-  view : matrix4x4<f32>,
-  position: vec3<f32>,
+  projection : matrix4x4f,
+  view : matrix4x4f,
+  position: vec3f,
 };
 @group(0) @binding(0) var<uniform> camera : Camera;
 
-@group(2) @binding(0) var<uniform> model : matrix4x4<f32>;
+@group(2) @binding(0) var<uniform> model : matrix4x4f;
 
 struct VertexOutput {
-  @builtin(position) position : vec4<f32>,
-  @location(0) texcoord : vec2<f32>,
+  @builtin(position) position : vec4f,
+  @location(0) texcoord : vec2f,
 };
 
 @vertex fn vertexMain(
-    @location(0) position : vec3<f32>,
-    @location(1) texcoord : vec2<f32>) -> VertexOutput {
+    @location(0) position : vec3f,
+    @location(1) texcoord : vec2f) -> VertexOutput {
   var output : VertexOutput;
   output.position = camera.projection * camera.view * model * vec4(position, 1.0);
   output.texcoord = texcoord;
@@ -733,8 +733,8 @@ struct VertexOutput {
 }
 
 @fragment fn fragmentMain(
-    @location(0) texcoord : vec2<f32>) -> @location(0) vec4<f32> {
-  return vec4<32f>(1.0, 0.0, 1.0, 1.0);
+    @location(0) texcoord : vec2f) -> @location(0) vec4f {
+  return vec4(1.0, 0.0, 1.0, 1.0);
 }
 ```
 

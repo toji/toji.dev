@@ -187,7 +187,7 @@ A simple fragment shader that uses an external texture looks like this:
 @group(0) @binding(1) var textureSampler : sampler;
 
 @fragment
-fn fragMain(@location(1) texCoord : vec2<f32>) -> @location(0) vec4<f32> {
+fn fragMain(@location(1) texCoord : vec2f) -> @location(0) vec4f {
   return textureSampleLevel(externalTexture, textureSampler, texCoord);
 }
 ```
@@ -349,20 +349,20 @@ function webGPUGenerateMipmap(gpuDevice, texture, textureDescriptor) {
   // Create a simple shader that renders a fullscreen textured quad.
   const mipmapShaderModule = gpuDevice.createShaderModule({
     code: `
-      var<private> pos : array<vec2<f32>, 4> = array<vec2<f32>, 4>(
-        vec2<f32>(-1.0, 1.0), vec2<f32>(1.0, 1.0),
-        vec2<f32>(-1.0, -1.0), vec2<f32>(1.0, -1.0));
+      var<private> pos : array<vec2f, 4> = array<vec2f, 4>(
+        vec2(-1.0, 1.0), vec2(1.0, 1.0),
+        vec2(-1.0, -1.0), vec2(1.0, -1.0));
 
       struct VertexOutput {
-        @builtin(position) position : vec4<f32>;
-        @location(0) texCoord : vec2<f32>;
+        @builtin(position) position : vec4f;
+        @location(0) texCoord : vec2f;
       };
 
       @vertex
       fn vertexMain(@builtin(vertex_index) vertexIndex : u32) -> VertexOutput {
         var output : VertexOutput;
-        output.texCoord = pos[vertexIndex] * vec2<f32>(0.5, -0.5) + vec2<f32>(0.5);
-        output.position = vec4<f32>(pos[vertexIndex], 0.0, 1.0);
+        output.texCoord = pos[vertexIndex] * vec2(0.5, -0.5) + vec2(0.5);
+        output.position = vec4(pos[vertexIndex], 0.0, 1.0);
         return output;
       }
 
@@ -370,7 +370,7 @@ function webGPUGenerateMipmap(gpuDevice, texture, textureDescriptor) {
       @group(0) @binding(1) var img : texture_2d<f32>;
 
       @fragment
-      fn fragmentMain(@location(0) texCoord : vec2<f32>) -> @location(0) vec4<f32> {
+      fn fragmentMain(@location(0) texCoord : vec2f) -> @location(0) vec4f {
         return textureSample(img, imgSampler, texCoord);
       }
     `

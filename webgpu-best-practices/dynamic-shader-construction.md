@@ -18,9 +18,9 @@ It's very common to see tutorials or samples of GPU APIs where the shader code i
 ```rs
 // basic_fragment.wgsl
 @fragment
-fn fragmentMain() -> @location(0) vec4<f32> {
+fn fragmentMain() -> @location(0) vec4f {
   // Return a flat red
-  return vec4<f32>(1.0, 0.0, 0.0, 1.0);
+  return vec4(1.0, 0.0, 0.0, 1.0);
 }
 ```
 
@@ -41,9 +41,9 @@ Instead, having the shader defined in code offers a lot more flexibility with ve
 ```js
 // basic_fragment.js
 export const basicFragmentSrc = `
-  @fragment fn fragmentMain() -> @location(0) vec4<f32> {
+  @fragment fn fragmentMain() -> @location(0) vec4f {
     // Return a flat red
-    return vec4<f32>(1.0, 0.0, 0.0, 1.0);
+    return vec4(1.0, 0.0, 0.0, 1.0);
   }
 `;
 ```
@@ -105,8 +105,8 @@ By using template literals and string interpolation, though, we can create a muc
 export function basicFragmentSrc(alpha = 1.0) {
   return `
     @fragment
-    fn fragmentMain() -> @location(0) vec4<f32> {
-      return vec4<f32>(1.0, 0.0, 0.0, ${alpha});
+    fn fragmentMain() -> @location(0) vec4f {
+      return vec4(1.0, 0.0, 0.0, ${alpha});
     }
   `;
 }
@@ -140,16 +140,16 @@ export const mathDefines = `
 
 export const srgbUtils = `
   const INV_GAMMA = vec3(${1.0 / 2.2});
-  fn linearToSrgb(color : vec3<f32>) {
+  fn linearToSrgb(color : vec3f) {
     return pow(linear, INV_GAMMA);
   }
 `;
 
 export const cameraStruct = `
   struct Camera {
-    projection : mat4x4<f32>,
-    view : mat4x4<f32>,
-    position : vec3<f32>,
+    projection : mat4x4f,
+    view : mat4x4f,
+    position : vec3f,
   };
 `
 ```
@@ -163,16 +163,16 @@ export const basicShaderSrc = `
     @group(0) @binding(0) var<uniform> camera : Camera;
 
     @fragment
-    fn fragmentMain(@location(0) position : vec4<f32>) -> @builtin(position) vec4<f32> {
+    fn fragmentMain(@location(0) position : vec4f) -> @builtin(position) vec4f {
       return camera.projection * camera.view * position;
     }
 
     ${srgbUtils}
 
     @fragment
-    fn fragmentMain() -> @location(0) vec4<f32> {
+    fn fragmentMain() -> @location(0) vec4f {
       let srgbColor = linearToSrgb(vec3(1.0, 0.0, 0.0));
-      return vec4<f32>(srgbColor, 1.0);
+      return vec4(srgbColor, 1.0);
     }
   `;
 }
@@ -225,12 +225,12 @@ Unfortunately for us, JavaScript doesn't offer the same type of easy replacement
 export function basicFragmentSrc(blue = false) {
   let code = `
     @fragment
-    fn fragmentMain() -> @location(0) vec4<f32> {
+    fn fragmentMain() -> @location(0) vec4f {
   `;
   if (blue) {
-    code += `return vec4<f32>(0.0, 0.0, 1.0, 1.0);\n`;
+    code += `return vec4(0.0, 0.0, 1.0, 1.0);\n`;
   } else {
-    code += `return vec4<f32>(1.0, 0.0, 0.0, 1.0);\n`;
+    code += `return vec4(1.0, 0.0, 0.0, 1.0);\n`;
   }
   code += '}';
   return code;
@@ -248,11 +248,11 @@ import { wgsl } from 'https://cdn.jsdelivr.net/npm/wgsl-preprocessor@1.0/wgsl-pr
 export function basicFragmentSrc(blue = false) {
   return wgsl`
     @fragment
-    fn fragmentMain() -> @location(0) vec4<f32> {
+    fn fragmentMain() -> @location(0) vec4f {
       #ifdef ${blue}
-        return vec4<f32>(0.0, 0.0, 1.0, 1.0);
+        return vec4(0.0, 0.0, 1.0, 1.0);
       #else
-        return vec4<f32>(1.0, 0.0, 0.0, 1.0);
+        return vec4(1.0, 0.0, 0.0, 1.0);
       #endif
     }
   `;
@@ -277,11 +277,11 @@ export function basicFragmentSrc(blue = false) {
   // Will apply syntax highlighting with the extension.
   return wgsl`
     @fragment
-    fn fragmentMain() -> @location(0) vec4<f32> {
+    fn fragmentMain() -> @location(0) vec4f {
       #ifdef ${blue}
-        return vec4<f32>(0.0, 0.0, 1.0, 1.0);
+        return vec4(0.0, 0.0, 1.0, 1.0);
       #else
-        return vec4<f32>(1.0, 0.0, 0.0, 1.0);
+        return vec4(1.0, 0.0, 0.0, 1.0);
       #endif
     }
   `;
@@ -290,8 +290,8 @@ export function basicFragmentSrc(blue = false) {
 // Also applies syntax highlighting, but without the preprocessor handling!
 export const greenFragmentSrc = /*wgsl*/`
   @fragment
-  fn fragmentMain() -> @location(0) vec4<f32> {
-    return vec4<f32>(0.0, 1.0, 0.0, 1.0);
+  fn fragmentMain() -> @location(0) vec4f {
+    return vec4(0.0, 1.0, 0.0, 1.0);
   }
 `
 ```
