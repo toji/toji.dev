@@ -16,3 +16,5 @@
       link: webgpu-best-practices/bind-groups
     - name: Dynamic Shader Construction
       link: webgpu-best-practices/dynamic-shader-construction
+    - name: Error Handling
+      link: webgpu-best-practices/error-handling

@@ -3,7 +3,7 @@ layout: page
 title: WebGPU Best Practices
 ---
 
-This repo contains several articles that describe best practices for working with various aspects of the WebGPU API.
+I've written multiple articles that describe best practices for working with various aspects of the WebGPU API.
 
 It should be noted that these pages are NOT a tutorial for getting started with WebGPU, and instead are focused on the
 most effective patterns for working with specific parts of the API, especially if you are a developer that's familiar
@@ -11,8 +11,9 @@ with WebGL or one of the native APIs. If you're interested in learning WebGPU, c
 (and be sure to come back when you've figured out the basics!)
 
  - [Raw WebGPU](https://alain.xyz/blog/raw-webgpu) - A beautifully presented tutorial
- - [WebGPU Samples](http://austin-eng.com/webgpu-samples) - Good for those that learn by example
+ - [WebGPU Samples](https://webgpu.github.io/webgpu-samples/) - Good for those that learn by example
  - [WebGPU Spec](https://gpuweb.github.io/gpuweb/) - Heavy reading, but a good reference
+ - [WGSL Spec](https://gpuweb.github.io/gpuweb/wgsl) - Companion to the WebGPU spec, detailing its shading language
 
 ## Best Practices
 
@@ -20,7 +21,7 @@ with WebGL or one of the native APIs. If you're interested in learning WebGPU, c
  - [WebGPU buffer upload best practices](./buffer-uploads) - Covers pushing data to any type of WebGPU buffer.
  - [WebGPU Bind Group best practices](./bind-groups) - Explains why bind groups are structured the way they are and how to make the best use of them.
  - [WebGPU dynamic shader construction](./dynamic-shader-construction) - Covers patterns for compensating for WGSLs lack of preprocessor statements when building out shader variants.
-
+ - [WebGPU error handling](./error-handling) - Covers different mechanisms for handling errors and improving debugging in WebGPU apps.
 
 I've also written a much, much longer article about efficiently displaying glTF files in WebGPU. It's not necessarily a "best practices" doc, but it contains many useful WebGPU tips and patterns nonetheless, as well as working samples!
  - [Efficently rendering glTF models: A WebGPU case study ](https://toji.github.io/webgpu-gltf-case-study/)

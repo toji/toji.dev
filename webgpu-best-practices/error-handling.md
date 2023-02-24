@@ -12,7 +12,7 @@ This all happens in a different thread or even different process than the one th
 
 Given the complex nature of GPU APIs, errors are _going_ to happen during development, so how do you handle them effectively in an environment like that?
 
-## The bad old days
+### The bad old days
 
 If you are familiar with WebGL or OpenGL, you may recall that it's error handling abilities... left something to be desired.
 
@@ -51,7 +51,7 @@ The fact that the error scopes resolve asynchorously is important, as it allows 
 
 If you capture an error in an error scope then the associated human-readable message that normally would show up in the console in surpressed and instead given as the `message` attribute of the resoved error. There's no specific formatting rules around how these messages are formatted, and each implementation will do it a little differently. As a result, you **should not** attempt to parse them and react to the message contents programatically!
 
-## Reacting to errors
+### Reacting to errors
 
 Given that the message strings are intended for human consumption only, how your application responds to errors is going to be dictated by two things:
 
@@ -130,7 +130,7 @@ The `out-of-memory` error scope still encompasses the entire load here, even tho
 
 In all cases we've used error scopes to improve the user experience.
 
-## Potential pitfall: Async functions
+### Potential pitfall: Async functions
 
 One thing to watch out for when using error scopes, though, is to recognize that they can't automatically account for asynchronous code. For example, consider if the `loadMesh()` function used in the examples above looked like this:
 
@@ -297,7 +297,7 @@ Labels are never required, but can be assigned to every object type in WebGPU: D
 
 Once a label is set it makes it easy to identify objects when stepping through code with a debugger or logging messages to the console. Those use cases alone would be enough to justify giving your objects labels, but they could have been accomplished without explicit API support. What makes WebGPU labels special is that they will help you identify problems at a much deeper level.
 
-## Debug Labels in error messages
+### Labels in error messages
 
 WebGPU implementations will make use of the labels that you provide when reporting error messages to help you identify the problem faster. As mentioned above, there's no message formatting rules so each implementation will use labels differently. We'll use error messages returned from Chrome to demonstrate here, but you should get comprable results from most browsers that implement WebGPU.
 
