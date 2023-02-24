@@ -19,6 +19,7 @@ If you are familiar with WebGL or OpenGL, you may recall that it's error handlin
 The short version was that at any point during you application you would call `gl.getError()`, which would stop your GPU's pipelining in it's tracks, force all current commands to finish, and then for your trouble give you one of a handful of vauge codes that represented the first error that happened since the last time someone called `gl.getError()`. If you wanted any control over which set of commands the error check covered you had to pepper your code with `gl.getError()` everywhere, which was an easy way to destroy your app's performance.
 
 ![Nothing about this was fine.](./media/gl-get-error.png)
+(With apologies to [KC Green](https://topatoco.com/collections/this-is-fine))
 
 We can do better!
 
