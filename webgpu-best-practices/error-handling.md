@@ -16,7 +16,7 @@ Given the complex nature of GPU APIs, errors are _going_ to happen during develo
 
 If you are familiar with WebGL or OpenGL, you may recall that it's error handling abilities... left something to be desired.
 
-The short version was that at any point during you application you would call `gl.getError()`, which would stop your GPU's pipelining in it's tracks, force all current commands to finish, and then for your trouble give you one of a handful of vauge codes that represented the first error that happened since the last time someone called `gl.getError()`. If you wanted any control over which set of commands the error check covered you had to pepper your code with `gl.getError()` everywhere, which was an easy way to destroy your app's performance.
+The short version was that at any point during you application you would call `gl.getError()`, which would ask the driver if any errors had occured, giving you back one of a handful of vauge codes that represented the first error that happened since the last time someone called `gl.getError()`. If you wanted any control over which set of commands the error check covered you had to pepper your code with `gl.getError()` everywhere, which was an easy way to destroy your app's performance. This is made even worse when using WebGL in a browser using a multi-process architecture such as Chrome, Edge, or Firefox, since the `gl.getError()` call is synchronous, and thus forces one process to stop and wait for another to catch up. The same thing may happen in the driver if it's multithreaded internally.
 
 ![Nothing about this was fine.](./media/gl-get-error.png)
 (With apologies to [KC Green](https://topatoco.com/collections/this-is-fine))
@@ -50,7 +50,7 @@ device.popErrorScope().then((error) => {
 
 The fact that the error scopes resolve asynchorously is important, as it allows the errors to be detected and reported without causing pipeline stalls on the GPU.
 
-If you capture an error in an error scope then the associated human-readable message that normally would show up in the console in surpressed and instead given as the `message` attribute of the resoved error. There's no specific formatting rules around how these messages are formatted, and each implementation will do it a little differently. As a result, you **should not** attempt to parse them and react to the message contents programatically!
+If you capture an error in an error scope then the associated human-readable message that normally would show up in the console in suppressed and instead given as the `message` attribute of the resolved error. There's no specific formatting rules around how these messages are formatted, and each implementation will do it a little differently. As a result, you **should not** attempt to parse them and react to the message contents programatically!
 
 ### Reacting to errors
 
