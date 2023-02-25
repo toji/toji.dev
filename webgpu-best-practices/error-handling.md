@@ -92,7 +92,7 @@ We can do better! First let's look at the different types of errors we can captu
 
  - **`validation`** errors occur whenever invalid inputs were given to a WebGPU call. These are consistent, predictable, and should generally not be expected during normal operation of a well formed application. They will fail in the same way on every device your code runs on, so once you've fixed any errors that show up during development you probably don't need to observe them directly most of the time. An exception to that rule is if you're consuming user-supplied assets/shaders/etc, in which case watching for validation errors while loading may be helpful.
  - **`out-of-memory`** errors mean exactly what they say: The device has run out of memory and can't complete the requested operation as a result. These should be relatively rare in a well behaved app but are much more unpredictable than validation errors because they are dependent on the device your app is running on in addition to what other things on the device are using GPU resources at the time.
- - **`internal`** errors occur when something happens in the WebGPU implementation that wasn't caught by validation and wasn't able to be clearly identified as an out of memory error. It generally means that an operation that you performed ran afoul some system limit in a way that was difficult to express with WebGPU's [supported limits](https://gpuweb.github.io/gpuweb/#gpusupportedlimits). The same operation might succeed on a different device. At the moment these can only be raised by pipeline creation, usually if the shader ends up being to complex for the device, but other situations might be added by the spec in the future.
+ - **`internal`** errors occur when something happens in the WebGPU implementation that wasn't caught by validation and wasn't able to be clearly identified as an out of memory error. It generally means that an operation that you performed ran afoul some system limit in a way that was difficult to express with WebGPU's [supported limits](https://gpuweb.github.io/gpuweb/#gpusupportedlimits). The same operation might succeed on a different device. At the moment these can only be raised by pipeline creation, usually if the shader ends up being too complex for the device, but other situations might be added by the spec in the future.
 
 Taking that into account, let's re-organize the above example to make better use of the error scopes:
 
@@ -212,7 +212,7 @@ One big exception to all of the above is shaders. Given that WGSL is a separate 
 
 To start, just like with other WebGPU errors, if you don't do anything then any messages generated at WGSL compile time will be displayed in the browser's developer console, and that should be sufficient for most basic debugging needs.
 
-However, what if you were building a web application that supported soemthing like live shader editing? (See https://shadertoy.com as an excellent WebGL-based example.) In that case it would be extremely useful to get very detailed messages from the browser about shader errors, warnings, and other messages along with contextual information such as what line in the shader provoked the message. That way you could surface them in the application UI itself rather than requiring users to keep the developer console open all the time.
+However, what if you were building a web application that supported soemthing like live shader editing? (See [ShaderToy](https://shadertoy.com) as an excellent WebGL-based example.) In that case it would be extremely useful to get very detailed messages from the browser about shader errors, warnings, and other messages along with contextual information such as what line in the shader provoked the message. That way you could surface them in the application UI itself rather than requiring users to keep the developer console open all the time.
 
 Fortunately, that's exactly what `shaderModule.getCompilationInfo()` provides you!
 
@@ -296,7 +296,7 @@ function recycleTexture(texture, newLabel) {
 
 Labels are never required, but can be assigned to every object type in WebGPU: Devices, Pipelines, Shader Modules, Bind Groups, Layouts, etc. Setting a label has very little overhead, and should be done even for release versions of your app. They are allowed to be any string you want, the API does not attempt to interpret them for semantic meaning. The label's only job is to help you, the developer, recognize what object is being referred to.
 
-Once a label is set it makes it easy to identify objects when stepping through code with a debugger or logging messages to the console. Those use cases alone would be enough to justify giving your objects labels, but they could have been accomplished without explicit API support. What makes WebGPU labels special is that they will help you identify problems at a much deeper level.
+Once a label is set it makes it easy to identify objects when stepping through code with a debugger. That use case alone would be enough to justify giving your objects labels, but it could have been accomplished without explicit API support. What makes WebGPU labels special is that they will help you identify problems at a much deeper level.
 
 ### Labels in error messages
 
