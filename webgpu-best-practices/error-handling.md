@@ -300,7 +300,7 @@ Once a label is set it makes it easy to identify objects when stepping through c
 
 ### Labels in error messages
 
-WebGPU implementations will make use of the labels that you provide when reporting error messages to help you identify the problem faster. As mentioned above, there's no message formatting rules so each implementation will use labels differently. We'll use error messages returned from Chrome to demonstrate here, but you should get comprable results from most browsers that implement WebGPU.
+WebGPU implementations will make use of the labels that you provide when reporting error messages to help you identify the problem faster. As mentioned above, there's no message formatting rules so each implementation will use labels differently. We'll use error messages returned from Chrome to demonstrate here, but you should get comparable results from most browsers that implement WebGPU.
 
 Let's look at an example snippet of WebGPU code that has an error in it:
 
