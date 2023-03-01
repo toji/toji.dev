@@ -342,16 +342,16 @@ But many WebGPU applications will be complex enough that simply saying "A buffer
 That's where labels come in! If you change the above buffer and render pass declarations to:
 
 ```diff
-const vertexBuffer = device.createBuffer({
-+ label: 'Player Vertices',
-  size: vertexData.byteLength,
-  usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
-});
+ const vertexBuffer = device.createBuffer({
++  label: 'Player Vertices',
+   size: vertexData.byteLength,
+   usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
+ });
 
-const passEncoder = commandEncoder.beginRenderPass({
-+ label: 'Primary Render Pass'
-  /*...*/
-});
+ const passEncoder = commandEncoder.beginRenderPass({
++  label: 'Primary Render Pass'
+   /*...*/
+ });
 ```
 
 The error message you get back will now look like:
