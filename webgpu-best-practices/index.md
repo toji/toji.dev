@@ -11,7 +11,9 @@ with WebGL or one of the native APIs. If you're interested in learning WebGPU, c
 (and be sure to come back when you've figured out the basics!)
 
  - [Raw WebGPU](https://alain.xyz/blog/raw-webgpu) - A beautifully presented tutorial
+ - [WebGPU: All the cores, none of the canvas](https://surma.dev/things/webgpu/) - A tutorial focused on using compute shaders
  - [WebGPU Samples](https://webgpu.github.io/webgpu-samples/) - Good for those that learn by example
+ - [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API) - Comprehensive API documentation
  - [WebGPU Spec](https://gpuweb.github.io/gpuweb/) - Heavy reading, but a good reference
  - [WGSL Spec](https://gpuweb.github.io/gpuweb/wgsl) - Companion to the WebGPU spec, detailing its shading language
 
