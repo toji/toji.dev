@@ -25,13 +25,13 @@ First we need to declare those values in the WGSL shader code, which would look 
 
 // Declaration of bind groups used by the vertex shader
 struct Camera {
-  projection : matrix4x4<f32>,
-  view : matrix4x4<f32>,
+  projection : matrix4x4f,
+  view : matrix4x4f,
   position: vec3f,
 };
 @group(0) @binding(0) var<uniform> camera : Camera;
 
-@group(0) @binding(1) var<uniform> model : matrix4x4<f32>;
+@group(0) @binding(1) var<uniform> model : matrix4x4f;
 
 // The remainder of this shader doesn't affect the bind groups.
 struct VertexOutput {
@@ -43,7 +43,7 @@ struct VertexOutput {
     @location(0) position : vec3f,
     @location(1) texcoord : vec2f) -> VertexOutput {
   var output : VertexOutput;
-  output.position = camera.projection * camera.view * model * vec4(position, 1.0);
+  output.position = camera.projection * camera.view * model * vec4f(position, 1);
   output.texcoord = texcoord;
   return output;
 }
@@ -345,7 +345,7 @@ fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
   let vVel = particlesIn[index].vel;
 
   particlesOut[index].pos = vPos + vVel;
-  particlesOut[index].vel = vVel + vec3(0.0, 0.0, -9.8);
+  particlesOut[index].vel = vVel + vec3f(0, 0, -9.8);
 }
 ```
 
@@ -555,7 +555,7 @@ struct VertexOutput {
     @location(0) position : vec3f,
     @location(1) texcoord : vec2f) -> VertexOutput {
   var output : VertexOutput;
-  output.position = camera.projection * camera.view * model * vec4(position, 1.0);
+  output.position = camera.projection * camera.view * model * vec4f(position, 1);
   output.texcoord = texcoord;
   return output;
 }
@@ -727,14 +727,14 @@ struct VertexOutput {
     @location(0) position : vec3f,
     @location(1) texcoord : vec2f) -> VertexOutput {
   var output : VertexOutput;
-  output.position = camera.projection * camera.view * model * vec4(position, 1.0);
+  output.position = camera.projection * camera.view * model * vec4f(position, 1);
   output.texcoord = texcoord;
   return output;
 }
 
 @fragment fn fragmentMain(
     @location(0) texcoord : vec2f) -> @location(0) vec4f {
-  return vec4(1.0, 0.0, 1.0, 1.0);
+  return vec4f(1, 0, 1, 1);
 }
 ```
 

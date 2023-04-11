@@ -350,8 +350,8 @@ function webGPUGenerateMipmap(gpuDevice, texture, textureDescriptor) {
   const mipmapShaderModule = gpuDevice.createShaderModule({
     code: `
       var<private> pos : array<vec2f, 4> = array<vec2f, 4>(
-        vec2(-1.0, 1.0), vec2(1.0, 1.0),
-        vec2(-1.0, -1.0), vec2(1.0, -1.0));
+        vec2f(-1, 1), vec2f(1, 1),
+        vec2f(-1, -1), vec2f(1, -1));
 
       struct VertexOutput {
         @builtin(position) position : vec4f;
@@ -361,8 +361,8 @@ function webGPUGenerateMipmap(gpuDevice, texture, textureDescriptor) {
       @vertex
       fn vertexMain(@builtin(vertex_index) vertexIndex : u32) -> VertexOutput {
         var output : VertexOutput;
-        output.texCoord = pos[vertexIndex] * vec2(0.5, -0.5) + vec2(0.5);
-        output.position = vec4(pos[vertexIndex], 0.0, 1.0);
+        output.texCoord = pos[vertexIndex] * vec2f(0.5, -0.5) + vec2f(0.5);
+        output.position = vec4f(pos[vertexIndex], 0, 1);
         return output;
       }
 

@@ -220,7 +220,7 @@ Fortunately, that's exactly what `shaderModule.getCompilationInfo()` provides yo
 const code = `
 @fragment
 fn fragmentMain() -> @location(0) vec4f {
-  return vec3(1.0, 0.0, 0.0, 1.0);
+  return vec3f(1, 0, 0, 1);
 }
 `;
 
@@ -251,11 +251,11 @@ As you can see from the above code snippet, after creating a shader module you c
 If we were to run the above snippet of code, we'd get back a message along the lines of:
 
 ```
-🛑 Line 4:14 - vec3(1.0, 0.0, 0.0, 1.0)
-    no matching constructor for vec3(abstract-float, abstract-float, abstract-float, abstract-float)
+🛑 Line 4:14 - vec3f(1, 0, 0, 1)
+    no matching constructor for vec3f(abstract-float, abstract-float, abstract-float, abstract-float)
 ```
 
-That's because we goofed up and typed `vec3` when we should have used `vec4`! Of course we didn't need to explicitly ask for this information if all we were going to do is echo it to the console, because the browser will already do that for us. But if we wanted to present this information in a more rich fashion, such as underline the problematic code in an editor, the compilation info error gives us everything we need.
+That's because we goofed up and typed `vec3f` when we should have used `vec4f`! Of course we didn't need to explicitly ask for this information if all we were going to do is echo it to the console, because the browser will already do that for us. But if we wanted to present this information in a more rich fashion, such as underline the problematic code in an editor, the compilation info error gives us everything we need.
 
 ## Debug Labels
 

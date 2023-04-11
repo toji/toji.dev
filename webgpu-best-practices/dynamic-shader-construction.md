@@ -20,7 +20,7 @@ It's very common to see tutorials or samples of GPU APIs where the shader code i
 @fragment
 fn fragmentMain() -> @location(0) vec4f {
   // Return a flat red
-  return vec4(1.0, 0.0, 0.0, 1.0);
+  return vec4f(1, 0, 0, 1);
 }
 ```
 
@@ -43,7 +43,7 @@ Instead, having the shader defined in code offers a lot more flexibility with ve
 export const basicFragmentSrc = `
   @fragment fn fragmentMain() -> @location(0) vec4f {
     // Return a flat red
-    return vec4(1.0, 0.0, 0.0, 1.0);
+    return vec4f(1, 0, 0, 1);
   }
 `;
 ```
@@ -78,7 +78,7 @@ void main() {
 
 ```js
 // Application JavaScript
-async function basicFragmentSrc(alpha = 1.0) {
+async function basicFragmentSrc(alpha = 1) {
   const code = await fetch('./basic_fragment.glsl').text();
 
   let defines = '#define ALPHA ' + alpha + '\n';
@@ -102,11 +102,11 @@ By using template literals and string interpolation, though, we can create a muc
 
 ```js
 // basic_fragment.js
-export function basicFragmentSrc(alpha = 1.0) {
+export function basicFragmentSrc(alpha = 1) {
   return `
     @fragment
     fn fragmentMain() -> @location(0) vec4f {
-      return vec4(1.0, 0.0, 0.0, ${alpha});
+      return vec4f(1, 0, 0, ${alpha});
     }
   `;
 }
@@ -139,8 +139,8 @@ export const mathDefines = `
 `;
 
 export const srgbUtils = `
-  const INV_GAMMA = vec3(${1.0 / 2.2});
-  fn linearToSrgb(color : vec3f) {
+  const INV_GAMMA = vec3f(${1 / 2.2});
+  fn linearToSrgb(color : vec3f) -> vec3f {
     return pow(linear, INV_GAMMA);
   }
 `;
@@ -171,8 +171,8 @@ export const basicShaderSrc = `
 
     @fragment
     fn fragmentMain() -> @location(0) vec4f {
-      let srgbColor = linearToSrgb(vec3(1.0, 0.0, 0.0));
-      return vec4(srgbColor, 1.0);
+      let srgbColor = linearToSrgb(vec3f(1, 0, 0));
+      return vec4f(srgbColor, 1);
     }
   `;
 }
@@ -228,9 +228,9 @@ export function basicFragmentSrc(blue = false) {
     fn fragmentMain() -> @location(0) vec4f {
   `;
   if (blue) {
-    code += `return vec4(0.0, 0.0, 1.0, 1.0);\n`;
+    code += `return vec4f(0, 0, 1, 1);\n`;
   } else {
-    code += `return vec4(1.0, 0.0, 0.0, 1.0);\n`;
+    code += `return vec4f(1, 0, 0, 1);\n`;
   }
   code += '}';
   return code;
@@ -250,9 +250,9 @@ export function basicFragmentSrc(blue = false) {
     @fragment
     fn fragmentMain() -> @location(0) vec4f {
       #ifdef ${blue}
-        return vec4(0.0, 0.0, 1.0, 1.0);
+        return vec4f(0, 0, 1, 1);
       #else
-        return vec4(1.0, 0.0, 0.0, 1.0);
+        return vec4f(1, 0, 0, 1);
       #endif
     }
   `;
@@ -279,9 +279,9 @@ export function basicFragmentSrc(blue = false) {
     @fragment
     fn fragmentMain() -> @location(0) vec4f {
       #ifdef ${blue}
-        return vec4(0.0, 0.0, 1.0, 1.0);
+        return vec4f(0, 0, 1, 1);
       #else
-        return vec4(1.0, 0.0, 0.0, 1.0);
+        return vec4f(1, 0, 0, 1);
       #endif
     }
   `;
@@ -291,7 +291,7 @@ export function basicFragmentSrc(blue = false) {
 export const greenFragmentSrc = /*wgsl*/`
   @fragment
   fn fragmentMain() -> @location(0) vec4f {
-    return vec4(0.0, 1.0, 0.0, 1.0);
+    return vec4f(0, 1, 0, 1);
   }
 `
 ```
