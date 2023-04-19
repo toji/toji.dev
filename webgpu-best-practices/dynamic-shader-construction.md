@@ -127,6 +127,133 @@ const basicAlphaFragment = device.createShaderModule({
 });
 ```
 
+## Alternately, use pipeline-overridable constants
+
+Another way to provide constants to your shaders in WebGPU that wasn't available to WebGL is [pipeline-overridable constants](https://gpuweb.github.io/gpuweb/#dom-gpuprogrammablestage-constants).
+
+Pipeline-overridable constants are values that you can set in your WGSL shader, with an optional default value, and then at _pipeline creation time_ override them with a JavaScript-provided value. Consider the following:
+
+```js
+const overridesFragment = device.createShaderModule({
+  code: `
+    @id(0) override red: f32;
+    @id(12) override green: f32 = 0;
+    override blue: f32 = 0;
+    override alpha: f32 = 1;
+    override gammaCorrect: bool = false;
+
+    @fragment
+    fn fragmentMain() -> @location(0) vec4f {
+      if (gammaCorrect) {
+        return vec4f(vec3f(red, green, blue) * (1/2.2), alpha);
+      } else {
+        return vec4f(red, green, blue, alpha);
+      }
+    }
+  `
+});
+```
+
+This shader has five overridable constants: `red`, `green`, `blue`, and `alpha`, and `gammaCorrect`. Of them four have defaults, and one (`red`), does not. These can all be set at pipeline creation time, though only `red` is required to be (since it has no default value.)
+
+```js
+const redPipeline = device.createRenderPipeline({
+  /* Most values omitted for brevity */
+  fragment: {
+    module: overridesFragment,
+    entryPoint: 'fragmentMain',
+    constants: {
+      red: 1,
+    },
+  }
+});
+```
+
+You can see here that the `red` value is provided by name at pipeline creation time. `red` and `green` can also be referenced by an arbitrary `@id` that they were assigned in the shader, while `blue` and `alpha` must be referenced by name.
+
+```js
+const orangePipeline = device.createRenderPipeline({
+  /* Most values omitted for brevity */
+  fragment: {
+    module: overridesFragment,
+    entryPoint: 'fragmentMain',
+    constants: {
+      0: 1, // Red
+      12: 0.6 // Green
+      blue: 0
+    },
+  }
+});
+```
+
+Pipeline overridable constants can't be vectors or arrays, but they _can_ be booleans, which is handy for selecting a branch which should always be taken for that pipeline.
+
+```js
+const gammaFragment = device.createShaderModule({
+  code: `
+    override gammaCorrect: bool = false;
+
+    @fragment
+    fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
+      if (gammaCorrect) {
+        return vec4f(color.rgb * (1/2.2), color.a);
+      } else {
+        return color;
+      }
+    }
+  `
+});
+
+const linearPipeline = device.createRenderPipeline({
+  /* Most values omitted for brevity */
+  fragment: {
+    module: gammaFragment,
+    entryPoint: 'fragmentMain',
+  }
+});
+
+const gammaCorrectPipeline = device.createRenderPipeline({
+  /* Most values omitted for brevity */
+  fragment: {
+    module: gammaFragment,
+    entryPoint: 'fragmentMain',
+    constants: {
+      gammaCorrect: true
+    },
+  }
+});
+```
+
+(A word of caution: Whether or not using overrides for that kind of branch selection is optimized to remove the other branch is a task that's largely in the hands of your GPU driver. If you want to guarantee that only the desired branch is present, consider using tagged template literals to emulate preprocessor statements, as described later in this doc.)
+
+Finally, it's worth pointing out that pipeline override constants can be used to set the `@workgroup_size` attribute (no other attributes, unfortunately). This is a handy way to manage them cooperatively with your JavaScript code.
+
+```js
+const computeFragment = device.createShaderModule({
+  code: `
+    override wgSize: u32 = 64;
+
+    @compute @workgroup_size(wgSize)
+    fn computeMain() {
+      // Some compute work
+    }
+  `
+});
+
+const computePipeline = device.createComputePipeline({
+  layout: 'auto'
+  compute: {
+    module: computeFragment,
+    entryPoint: 'computeMain',
+    constants: {
+      wgSize: evenDivisorOfWorkSize
+    }
+  }
+});
+```
+
+Ultimately all of these uses can also be achived with template literals. The benefit that the overriable constants have is that they can be applied without recreating the shader module, which can improve performance when creating a large variety of pipeline variants. 
+
 ## Use JavaScript modules string interpolation to reuse shader fragments
 
 Another common pattern for applications with large shaders is to define common functions, structs, or constants in one file and then include them in others. Most shading languages have no facility for this, but we can use JavaScript imports and string interpolation to build out a library of common shader functionality quite elegantly:
