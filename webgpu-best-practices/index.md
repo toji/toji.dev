@@ -10,6 +10,7 @@ most effective patterns for working with specific parts of the API, especially i
 with WebGL or one of the native APIs. If you're interested in learning WebGPU, check out the following resources first
 (and be sure to come back when you've figured out the basics!)
 
+ - [WebGPU Fundamentals](https://webgpufundamentals.org/) - In-depth walkthroughs of WebGPU concepts with live examples/visualizations
  - [Raw WebGPU](https://alain.xyz/blog/raw-webgpu) - A beautifully presented tutorial
  - [WebGPU: All the cores, none of the canvas](https://surma.dev/things/webgpu/) - A tutorial focused on using compute shaders
  - [WebGPU Samples](https://webgpu.github.io/webgpu-samples/) - Good for those that learn by example
