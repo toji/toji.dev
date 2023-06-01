@@ -178,7 +178,7 @@ const texture = gpuDevice.importExternalTexture({ source: video });
 `importExternalTexture()` returns a `GPUExternalTexture`, which can be sampled like a texture in your shaders (with some limits, more on that in a moment). It can't, however, have its contents changed, copied from, or otherwise manipulated. This restriction allows the browser to implement `importExternalTexture()` without creating a copy of the video frame, which can represent a big performance boost and memory savings!
 
 Also, due to how browsers implement `GPUExternalTextures` they have some special needs regarding how they're used in shaders. When
-declaring the binding the type needs to be `texture_external` and sampling needs to happen with the `textureSampleLevel()` function explicitly. (`GPUExternalTextures` have no mipmaps to sample from.)
+declaring the binding the type needs to be `texture_external` and sampling needs to happen with the `textureSampleBaseClampToEdge()` function explicitly. (`GPUExternalTextures` have no mipmaps to sample from, and the API enforces that they use clamp-to-edge wrapping, hence the unweildy name.)
 
 A simple fragment shader that uses an external texture looks like this:
 
@@ -188,7 +188,7 @@ A simple fragment shader that uses an external texture looks like this:
 
 @fragment
 fn fragMain(@location(1) texCoord : vec2f) -> @location(0) vec4f {
-  return textureSampleLevel(externalTexture, textureSampler, texCoord);
+  return textureSampleBaseClampToEdge(externalTexture, textureSampler, texCoord);
 }
 ```
 
