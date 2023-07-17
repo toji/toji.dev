@@ -22,7 +22,7 @@ I have been at Google on the Chrome team for 10+ years working on various Web AP
 If you need to contact me for work reasons, the best way is my corporate email: bajones@google.com
 
 ## My Code
-Almost everything I work on in open source, with the majority of it being either on the Chromium project and its dependencies or [GitHub](https://github.com/toji). Outside of Chrome I tend to work on either utility libraries or samples for the various bits of web tech I'm working on. Some of my more notable projects include:
+Almost everything I work on is open source, with the majority of it being either on the Chromium project and its dependencies or [GitHub](https://github.com/toji). Outside of Chrome I tend to work on either utility libraries or samples for the various bits of web tech I'm working on. Some of my more notable projects include:
 
  - [glMatrix](https://glmatrix.net/) - High performance JavaScript vector and matrix library.
  - [Quake 3 WebGL Map Viewer](https://media.tojicode.com/q3bsp/) - On of the more complex early WebGL projects on the web.

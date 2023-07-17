@@ -18,3 +18,5 @@
       link: webgpu-best-practices/dynamic-shader-construction
     - name: Error Handling
       link: webgpu-best-practices/error-handling
+    - name: Compute w/ Vertex Data
+      link: webgpu-best-practices/compute-vertex-data
