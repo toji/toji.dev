@@ -524,7 +524,7 @@ fn getJoints16(index: u32) -> vec4u {
 }
 ```
 
-You'll want to select which of those joint unpacking methods to use at pipeline creation time. See my [WebGPU Dynamic Shader Construction](../dynamic-shader-construction) article for more details on various ways to approach that.
+You'll want to select which of those joint unpacking methods to use at pipeline creation time. See my [WebGPU Dynamic Shader Construction](./dynamic-shader-construction) article for more details on various ways to approach that.
 
 Extracting 8 or 16 bit integer values from 32 bit integer values is pretty straightforward, as you can see above. If you happen to have 16 bit floating point values, though, it's going to be harder. Eventually most WebGPU implementations are likely to support the [`"shader-f16"`](https://gpuweb.github.io/gpuweb/#shader-f16) feature, which will allow you to use `array<f16>` directly in your shader. Until that's widespread, however, you'll have to do unpacking from the 16 bit value (passed as 32 bit unsigned ints and separated into 16 bit values as shown in the `getJoints16()` function above) into a 32 bit float yourself. That's [a non-trivial operation](https://en.wikipedia.org/wiki/Half-precision_floating-point_format), and beyond the scope of this document.
 
