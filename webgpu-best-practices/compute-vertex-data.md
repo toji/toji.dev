@@ -45,7 +45,7 @@ const pipeline = device.createRenderPipeline({
         format: 'float32x3'
         offset: 0,
       }, {
-        shaderLocation: 1, // texcoord 
+        shaderLocation: 1, // texcoord
         format: 'float32x2'
         offset: 12,
       }]
@@ -202,7 +202,9 @@ normals[3] = vec3f(12, 13, 14);
 
 Note how every 4th value is missing, and the data quickly gets out of alignment. So how do we solve this?
 
-One way is to ensure all of the data in your buffers fits WGSLs alignment restrictions, but that's difficult to ensure if you're reading the vertex data from an external source (like a glTF model). It also can waste memory with unnecessary padding. Fortunately there's an alternative.
+One way is to ensure all of the data in your buffers fits WGSLs alignment restrictions. If you're generating meshes dynamically and you know that you'll be manipulating the values in a compute shader, it can be worth your time to structure the values in a way that allows them to be cleanly exposed to WGSL. Similarly, if you have the opportunity to pre-process model files beforehand to make the data layout more compute-friendly it's best to do that offline.
+
+But it's difficult to ensure a specific data layout if you're reading the vertex data from an external source (like a glTF model) that you don't control. Similarly, if you are building middleware you can't generally control the data that will be fed to your library. Formatting data for easy compute shader consumption can also waste memory with unnecessary padding. Fortunately, if any of those are a concern for you, there's an alternative.
 
 ### Use arrays of scalars instead of vectors
 
