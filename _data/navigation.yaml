@@ -2,7 +2,7 @@
   link: articles
   dropdown:
     - name: Efficently rendering glTF models
-      link: https://toji.github.io/webgpu-gltf-case-study/
+      link: webgpu-gltf-case-study/
     - name: WebXR Scene Optimization
       link: webxr-scene-optimization/
 - name: WebGPU Best Practices
