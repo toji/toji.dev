@@ -528,7 +528,15 @@ fn getJoints16(index: u32) -> vec4u {
 
 You'll want to select which of those joint unpacking methods to use at pipeline creation time. See my [WebGPU Dynamic Shader Construction](./dynamic-shader-construction) article for more details on various ways to approach that.
 
-Extracting 8 or 16 bit integer values from 32 bit integer values is pretty straightforward, as you can see above. If you happen to have 16 bit floating point values, though, it's going to be harder. Eventually most WebGPU implementations are likely to support the [`"shader-f16"`](https://gpuweb.github.io/gpuweb/#shader-f16) feature, which will allow you to use `array<f16>` directly in your shader. Until that's widespread, however, you'll have to do unpacking from the 16 bit value (passed as 32 bit unsigned ints and separated into 16 bit values as shown in the `getJoints16()` function above) into a 32 bit float yourself. That's [a non-trivial operation](https://en.wikipedia.org/wiki/Half-precision_floating-point_format), and beyond the scope of this document.
+### Unpacking/packing non-32 bit floats
+
+Extracting 8 or 16 bit integer values from 32 bit integer values is pretty straightforward, as you can see above. If you happen to have floating point values that aren't 32 bit, though, you need to take a different approach. Normally the alroithims for unpacking binary16 (or "half") floats into a 32 bit ones from a `u32` value is [a non-trivial operation](https://en.wikipedia.org/wiki/Half-precision_floating-point_format), and beyond the scope of this document. Fortunately WGSL has some functions to help you out here.
+
+First, there's the [`unpack2x16float()` builtin function](https://gpuweb.github.io/gpuweb/wgsl/#unpack2x16float-builtin). This will take a single `u32` value and return a `vec2f` containing the converted 16-bit floats from either half of the `u32` binary value. The [`pack2x16float()` builtin function](https://gpuweb.github.io/gpuweb/wgsl/#pack2x16float-builtin) is also provided to go the other direction, encoding a `vec2f` as a single `u32` value.
+
+Also, eventually most WebGPU implementations are likely to support the [`"shader-f16"`](https://gpuweb.github.io/gpuweb/#shader-f16) feature, which will allow you to use `array<f16>` directly in your shader.
+
+It's also fairly common to work with normalized values, where the full range of an integer value is interpreted as a floating point value with a 0->1 range. So the value of `255` in an 8 bit unsigned int would be treated as `1.0`, the value of `127` would be treated as `0.5`, etc. This is especially common when dealing with color data. These conversions are more trivial, in that you simply have to bitmask out the packed values and divide by the max value for that type, but WGSL also offers convenience functions to help with these conversions too: [`unpack4x8snorm()`, `unpack4x8unorm()`, `unpack2x16snorm()`, and `unpack2x16unorm()`](https://gpuweb.github.io/gpuweb/wgsl/#unpack-builtin-functions), as well as the inverse [packing functions](https://gpuweb.github.io/gpuweb/wgsl/#pack-builtin-functions).
 
 ## Final Example: Normal generation
 
