@@ -26,6 +26,7 @@ with WebGL or one of the native APIs. If you're interested in learning WebGPU, c
  - [WebGPU dynamic shader construction](./dynamic-shader-construction) - Covers patterns for compensating for WGSLs lack of preprocessor statements when building out shader variants.
  - [WebGPU error handling](./error-handling) - Covers different mechanisms for handling errors and improving debugging in WebGPU apps.
  - [Using WebGPU Compute Shaders with Vertex Data](./compute-vertex-data) - Covers patters for working with alignment restrictions to manipulate vertex data (or similarly structured values) in compute shaders.
+ - [WebGPU Render Bundle best practices](./render-bundles) - Covers usage of Render Bundles to reduce CPU overhead and how they can accomodate a variety of rendering needs.
 
 I've also written a much, much longer article about efficiently displaying glTF files in WebGPU. It's not necessarily a "best practices" doc, but it contains many useful WebGPU tips and patterns nonetheless, as well as working samples!
  - [Efficently rendering glTF models: A WebGPU case study ](https://toji.github.io/webgpu-gltf-case-study/)
