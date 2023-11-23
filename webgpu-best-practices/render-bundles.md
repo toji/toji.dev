@@ -308,6 +308,8 @@ This is a great technique to reduce render times even without render bundles, bu
 I've built [a simple demo that demonstrates this technique with WebGPU](https://toji.github.io/webgpu-bundle-culling). In it you can switch between a naive draw loop (one draw call per instance), an instanced draw loop (one draw call per unique object type), and a draw loop using the GPU culling algorithm described above, as well as versions of all of the above that use render bundles.
 [![A screenshot of the render bundle culling demo](./media/bundle-culling-demo.png)](https://toji.github.io/webgpu-bundle-culling)
 
+(NOTE: There's a [known bug](https://bugs.chromium.org/p/chromium/issues/detail?id=1478906) on Windows in Chrome 119 and 120, the current stable and beta versions. It prevents the overhead view from rendering for the culled render modes in this demo. It's been resolved on Chrome 121, which is the current dev and canary version.)
+
 Results will vary depending on your device, but I find that on many of the devices that I tested using the GPU culling path makes the difference between the scene running smoothly or being a choppy mess.
 
 #### GPU Culling Caveats
