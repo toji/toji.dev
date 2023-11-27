@@ -33,7 +33,7 @@ When using a render bundle the same steps apply when initially encoding the rend
 
 Here you can see that using a bundle allowed the same work to be dispatched to the hardware with far less CPU-side communication. This is because much of the validation and encoding was already performed at bundle encoding time and doesn't need to be repeated.
 
-For applications that are **CPU bound**, meaning that they're having trouble feeding work to the GPU fast enough, render bundles can offer a valuable optimization tool. It's worth noting, however, that if a given WebGPU application is **GPU bound**, in that the main thing limiting it's performance is the GPU's fill rate or vertex processing speed, then using render bundles won't magically improve performance. They only reduce the CPU-side overhead of submitting commands. 
+For applications that are **CPU bound**, meaning that they're having trouble feeding work to the GPU fast enough, render bundles can offer a valuable optimization tool. It's worth noting, however, that if a given WebGPU application is **GPU bound**, in that the main thing limiting it's performance is the GPU's fill rate or vertex processing speed, then using render bundles won't magically improve performance. They only reduce the CPU-side overhead of submitting commands.
 
 Still, it's rarely a bad idea to reduce CPU usage, even if that's not the primary bottleneck in your app! It can improve battery life, allow more overhead for other CPU operations, and potentially expand the range of devices your app works well on! Using render bundles where you can will rarely be deterimental to your application's performance.
 
@@ -241,6 +241,14 @@ Similarly, there's some types of WebGPU content that actively requires frequent 
 An exception would be if you know that the same content will be rendered more than once in a single frame, such as when rendering the left and right views for a virtual reality application. In that case the savings from skipping the encoding and validation for the repeated draws will almost always be worth it, even if the content being drawn is changing on a nearly per-frame basis.
 
 Fortunately, render bundles are not an all-or-nothing concept! You can easily mix more stable content drawn with a render bundle with frequently changing content that is encoded dynamically every frame. Or mix-and-match several render bundles, as needed for the scene. For example, you may have one large render bundle that draws most of the static elements of a scene, several smaller ones that each draw a single complex character, and a few non-bundled draws for a video embedded in the scene. It's entirely up to you based on the needs of your content.
+
+## Aside: Why aren't there Compute Bundles?
+
+You might notice that any mention of compute work is conspicuously absent from all of this bundle talk. And that's because there's no compute bundles in WebGPU! Why is that?
+
+Well, primarily it's due to the fact that while render bundles have equivalent native APIs that can be used to implement them, bundling of compute operations doesn't have the same native support. Besides that, though, we just don't generally expect that compute operations will need it to the same degree that render operations do. Rendering can easily involve hundreds or thousands of draw calls per frame, which typically requires a lot of state setting. In contrast, it's common for an application's compute work to consist of a few big jobs with less state, which are easier to set up and dispatch overall.
+
+That's not going to hold true for everything, of course, and if the WebGPU working group sees that the CPU overhead of dispatching compute work is becoming a bottleneck for developers then there's a good chance that compute bundles will be considered.
 
 ## Dynamic Content in Render Bundles
 
