@@ -22,3 +22,5 @@
       link: webgpu-best-practices/compute-vertex-data
     - name: Render Bundles
       link: webgpu-best-practices/render-bundles
+    - name: WebGPU/WebGL Comparisons
+      link: webgpu-best-practices/webgl-performance-comparison
