@@ -21,7 +21,7 @@ The first step for any WebGPU or WebGL-based page is going to be to get an adapt
 const adapter = await navigator.gpu.requestAdapter();
 
 // WebGL
-const gl = await canvas.getContext('webgl');
+const gl = canvas.getContext('webgl');
 ```
 
 Oops! You've already opened the door to an invalid comparison!
@@ -67,6 +67,8 @@ console.log(`WebGL vendor: ${vendor}, renderer: ${renderer}`);
 ```
 
 It's important to note that the strings given by both of these APIs are not directly comparable! The WebGPU strings are likely to (intentionally) be more terse and higher level. Your best bet is to visually inspect them and gauge whether or not you think they refer to the same device. At the very least if they both show a different vendor then you can be sure that they're not using the same device!
+
+In Chrome you can increase the details returned in the adapter info by navigating to about:flags and enabling the "WebGPU Developer Features" flag. This will provide more complete strings from the driver that can make it easier to compare. You shouldn't expect that flag to be set on user's devices, though, so don't write apps that depend on it.
 
 ## Canvas configuration
 
@@ -127,7 +129,7 @@ The consequence of not using the preferred format is that on some systems (for C
 
 WebGL contexts are created with a depth buffer but no stencil buffer by default, controlled using the `depth` and `stencil` booleans during context creation. WebGPU does not automatically handle creation of depth/stencil textures for you, but instead requires you to create one manually and provide it to the [`GPUDepthStencilAttachment`](https://gpuweb.github.io/gpuweb/#depth-stencil-attachments) when beginning a render pass.
 
-Whether or not your application needs a depth or stencil buffer is app-specific, but if ypur app doesn't require them ensure that you explicitly set `depth` and/or `stencil` to false when creating the WebGL context.
+Whether or not your application needs a depth or stencil buffer is app-specific, but if your app doesn't require them ensure that you explicitly set `depth` and/or `stencil` to false when creating the WebGL context.
 
 ```js
 // WebGL - Create a context without a depth/stencil buffer
@@ -141,7 +143,9 @@ const gl = canvas.getContext('webgl', {
 
 Conversely, if a depth/stencil buffer is used in WebGL ensure that you are passing an equivalent WebGPU depth/stencil texture to the appropriate render passes.
 
-Unfortunately the [WebGL spec is unclear on exactly what format of depth/stencil buffer will be allocated](https://registry.khronos.org/webgl/specs/latest/1.0/#WEBGLCONTEXTATTRIBUTES), it merely says that any depth buffer will be at least 16 bits and any stencil buffer will be at least 8 bits. In Chrome, at least, this is very likely to be a [ `GL_DEPTH24_STENCIL8_OES`](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/platform/graphics/gpu/drawing_buffer.cc;drc=8ee9326b165ffd2d2575df34b054b435f0253871;l=1320) renderbuffer (even if stencil wasn't explicitly requested, as a compatibility workaround.) The equivalent [WebGPU depth/stencil format](https://gpuweb.github.io/gpuweb/#depth-formats) would be a `'depth24plus-stencil8'` texture, though you can use a `'depth24plus'` texture if no stencil is required and `'stencil8'` if no depth is required.
+Unfortunately the [WebGL spec is unclear on exactly what format of depth/stencil buffer will be allocated](https://registry.khronos.org/webgl/specs/latest/1.0/#WEBGLCONTEXTATTRIBUTES), it merely says that any depth buffer will be at least 16 bits and any stencil buffer will be at least 8 bits.  You can query the exact precision by calling `gl.getParamter(gl.DEPTH_BITS)` and `gl.getParamter(gl.STENCIL_BITS)`. In Chrome, at least, this is very likely to be a [ `GL_DEPTH24_STENCIL8_OES`](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/platform/graphics/gpu/drawing_buffer.cc;drc=8ee9326b165ffd2d2575df34b054b435f0253871;l=1320) renderbuffer (even if stencil wasn't explicitly requested, as a compatibility workaround.)
+
+The equivalent [WebGPU depth/stencil format](https://gpuweb.github.io/gpuweb/#depth-formats) would be a `'depth24plus-stencil8'` texture, though you can use a `'depth24plus'` texture if no stencil is required and `'stencil8'` if no depth is required.
 
 Regardless of the format used, don't enable depth or stencil operations in your WebGPU render passes if the WebGL context does not explicitly enable the same.
 
