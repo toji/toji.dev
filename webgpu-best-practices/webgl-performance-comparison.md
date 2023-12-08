@@ -41,7 +41,7 @@ To mitigate this, you should provide hints to the API about which GPU should be 
 const adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
 
 // WebGL
-const gl = await canvas.getContext('webgl', { powerPreference: 'high-performance' });
+const gl = canvas.getContext('webgl', { powerPreference: 'high-performance' });
 ```
 
 This dramatically increases your chances of getting the same GPU for both APIs! But it should be noted that this is merely a (fairly strong) hint. It's possible that flags provided to the browser, graphics driver utilities, or other external factors could still override this.
@@ -59,7 +59,7 @@ console.log(`WebGPU vendor: ${adapterInfo.vendor}, architecture: ${adapterInfo.a
 // Outputs something like "vendor: intel, architecture: gen-12lp"
 
 // WebGL
-const ext = await gl.getExtension('WEBGL_debug_renderer_info');
+const ext = gl.getExtension('WEBGL_debug_renderer_info');
 const vendor = gl.getParameter(ext.UNMASKED_VENDOR_WEBGL);
 const renderer = gl.getParameter(ext.UNMASKED_RENDERER_WEBGL);
 console.log(`WebGL vendor: ${vendor}, renderer: ${renderer}`);
