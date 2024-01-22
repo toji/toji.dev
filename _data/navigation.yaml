@@ -24,3 +24,5 @@
       link: webgpu-best-practices/render-bundles
     - name: WebGPU/WebGL Comparisons
       link: webgpu-best-practices/webgl-performance-comparison
+    - name: Indirect Draws
+      link: webgpu-best-practices/indirect-draws

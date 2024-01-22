@@ -297,6 +297,8 @@ The most common reason is that you want to define the draw call parameters in a 
 
 As you've probably guessed, since the indirect draw buffers are, well, buffers, they play nicely with render bundles. While the bindings and number of draw calls in a bundle will always be locked to what was originally encoded, if indirect draws are used the amount of geometry and the number of instances drawn by those calls can be dynamic. It makes it practical to include rendering things like particle systems in a render bundle without unnecessary overhead.
 
+> **Update:** If you are using indirect draws in your app, be sure to check out my article on [Indirect draw call best practices](./indirect-draws)!
+
 ### Object Culling
 
 That leads us to one of the most common concerns I've heard of when talking about render bundles: They don't seem to be compatible with common rendering optimizations such as frustum and occlusion culling. Happily for us, that's not the case! **Culling algorithms CAN be used with render bundles** by making use of indirect draws to keep visiblity testing results entirely on the GPU.

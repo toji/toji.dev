@@ -63,11 +63,17 @@ I am a strong believer in open source software, giving back to the community, an
 
     I have given many technical presentations over the years, but some of my favorite have been the guest lecures I was invited to give in [2022](https://www.youtube.com/watch?v=Hm2_bH_8j3k) and [2023](https://www.youtube.com/watch?v=41pC1MLMVdA) for the University of Pennsylvania CIS 565 program.
 
+## Fun facts
+
  - **glTF Model format proposal**
 
     While at Motorola I collaborated with Fabrice Robinet to design the initial iterations of what would eventually become the [glTF model format](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html), which has become an industry standard for exchange of realtime rendered 3D assets. You can see [a video of Fabrice and I presenting the concept](https://youtu.be/l40d2yEG-VU?si=SOg7t7RglsBL4-DR&t=1584) (then called COLLADA2JSON) at SIGGRAPH 2012 during the Khronos BOF session.
 
     It should be noted that while many elements of the model format were initially proposed by me I only participated loosely in the standardization process due to other obligations at the time. This is why [I am listed in the "Special Thanks" section of the spec](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#special-thanks).
+
+  - **[WebGPU logo](https://github.com/gpuweb/admin/issues/14#issuecomment-801444493)**
+
+    I designed and proposed the logo that was eventually accepted by the WebGPU working group.
 
 ## Skills
 

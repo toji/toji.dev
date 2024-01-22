@@ -6,9 +6,9 @@ menubar_toc: true
 
 ## TL;DR:
 
-If you use indirect drawing as part of your WebGPU application, put as many of the indirect draw args as you can into a single GPUBuffer. That's it. That's the whole best practice.
+If you use indirect drawing as part of your WebGPU application, put as many of the indirect draw args as you can into a single `GPUBuffer`. That's it. That's the whole best practice.
 
-**Temporary additional best practice: If running Chrome, use version 122 or higher. It includes a [significant optimization to indirect draw calls](https://bugs.chromium.org/p/dawn/issues/detail?id=2329). Chrome 122 is scheduled to be released as the stable version in late Feb 2024**
+_Temporary additional best practice: If running Chrome, use version 122 or higher. It includes a [significant optimization to indirect draw calls](https://bugs.chromium.org/p/dawn/issues/detail?id=2329). Chrome 122 is scheduled to be released as the stable version in late Feb 2024_
 
 ![But Why?](./media/butwhy.gif)
 
@@ -16,9 +16,9 @@ Okay, fine. So you probably want a few more details than that.
 
 ## What is an indirect draw?
 
-WebGPU includes the ability to execute "indirect commands" such as drawing and compute dispatches. Executed with the `drawIndirect()`, `drawIndexedIndirect()`, and `dispatchWorkgroupsIndirect()` commands, these operate exactly like the non-indirect versions of these methods with the critical difference that the arguments for the call are read from a `GPUBuffer` instaed of being passed directly.
+WebGPU includes the ability to execute "indirect commands" such as drawing and compute dispatches. Executed with the [`drawIndirect()`](https://gpuweb.github.io/gpuweb/#dom-gpurendercommandsmixin-drawindirect), [`drawIndexedIndirect()`](https://gpuweb.github.io/gpuweb/#dom-gpurendercommandsmixin-drawindexedindirect), and [`dispatchWorkgroupsIndirect()`](https://gpuweb.github.io/gpuweb/#dom-gpucomputepassencoder-dispatchworkgroupsindirect) commands, these operate exactly like the non-indirect versions of these methods with the critical difference that the arguments for the call are read from a `GPUBuffer` instead of being passed directly.
 
-That means that this draw call:
+So this draw call:
 
 ```js
 renderPass.draw(vertexCount, instanceCount);
@@ -41,23 +41,23 @@ device.queue.writeBuffer(drawBuffer, 0, drawArgs);
 renderPass.drawIndirect(drawBuffer, 0 /* drawBuffer Offset */);
 ```
 
-The reason that this is beneficial is because it allows the GPU to define the work that needs to be done rather than explicitly communicating it from the CPU. An example of this in action is described in my [Render Bundle best practices doc](./render-bundles#indirect-draws), which provides an example of using indirect draws to perform frustum culling in a compute shader without any CPU readback.
+The reason that this is beneficial is because it allows the GPU to define work that needs to be done in a shader rather than explicitly communicating it from the CPU. An example of this in action is described in my [Render Bundle best practices doc](./render-bundles#indirect-draws), which provides an example of using indirect draws to perform frustum culling in a compute shader without any CPU readback.
 
 ## Why does the buffer it's in matter?
 
-> NOTE: This section refers to implementation details of Chrome's WebGPU library, Dawn. It may not apply to other backends. I will update it as I learn more details of how other WebGPU implementations handle this aspect of the API.
+> NOTE: This section refers to implementation details of Chrome's WebGPU library, [Dawn](https://dawn.googlesource.com/dawn). It may not apply to other browsers. I will update it as I learn more details of how other WebGPU implementations handle this aspect of the API.
 
-One of the core features of WebGPU in the context of the browser is that it validates all the commands that it executes to ensure (as much as possible) that developers can't trigger undefined behavior in the drivers on users machines. In some cases we do these checks directly in the WebGPU implementation, such as verifying when you call `drawIndexed()` that the bound index buffer range has enough elements to cover the requested draw. Other times we can rely on hardware or driver features to do it for us, such as enabling various "robustness" features that ensure, for instance, that if an index points to a vertex that's out of bounds of the bound vertex buffer ranges, we won't get memory from another process back.
+One of the core features of WebGPU in the context of the browser is that it validates all the commands that it executes to ensure (as much as possible) that developers can't trigger undefined behavior in the drivers on users device. In some cases we do these checks in the WebGPU implementation, such as verifying when you call `drawIndexed()` that the bound index buffer range has enough elements to cover the requested draw. Other times we can rely on hardware or driver features to do it for us, such as enabling various "robustness" features. These ensure, for instance, that if an index points to a vertex that's outside the bound vertex buffer ranges, we won't get memory from another process back.
 
-When making indirect calls, however, we don't have an opportunity to do CPU-side validation of the call args. (Unless we read them back out of the buffer first, but that would be incredibly slow!) So we need to get more creative about how we ensure those calls are safe.
+When making indirect calls we don't have an opportunity to do CPU-side validation of the call args. (Unless we read them back out of the buffer first, but that would be incredibly slow!) So we need to get more creative about how we ensure those calls are safe.
 
-On devices that use our Vulkan backend, like Android, Chrome is able to rely on the aforementioned robustness features to ensure that shaders don't access memory not owned by the WebGPU device.
+On devices that use our Vulkan backend, like Android, Chrome is able to rely on the aforementioned [robustness features](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_EXT_robustness2.html) to ensure that shaders don't access memory not owned by the WebGPU device.
 
 On devices using our Metal backend we opted to use ["vertex pulling"](https://www.yosoygames.com.ar/wp/2018/03/vertex-formats-part-2-fetch-vs-pull/) for all of our vertex attributes, and thus can do a bounds check at the time the vertex data is fetched.
 
-On our D3D12 backend, however, we had the need to do some manual validation of the index count _and_ do some data copies for each indirect draw in order to ensure that the WGSL shaders could receive correct values for the `vertex_index` and `instance_index` builtins. To handle these operations efficently we inject compute dispatches that perform the necessary validations/copies at the beginning of render passes which make use of indirect draw calls.
+On our D3D12 backend, however, we had the need to do some manual validation of the index count _and_ do some data copies for each indirect draw in order to ensure that the WGSL shaders receive correct values for the [`vertex_index`](https://gpuweb.github.io/gpuweb/wgsl/#vertex-index-builtin-value) and [`instance_index`](https://gpuweb.github.io/gpuweb/wgsl/#instance-index-builtin-value) builtins. To handle these operations efficently we inject compute dispatches that perform the necessary validations and copies at the beginning of render passes which make use of indirect draw calls.
 
-As an optimization we try to batch these validations into as few separate dispatches as possible. The criteria for whether or not a particular indirect draw can be batched comes down to three things:
+As an optimization we try to batch these validations into as few dispatches as possible. The criteria for whether or not a particular indirect draw can be batched comes down to three things:
 
  - Is it an indexed or non-indexed draw?
  - Does the shader make use of the `vertex_index` and `instance_index` builtins?
@@ -73,13 +73,13 @@ Worse, because these dispatches are not part of the actual native rendering pass
 
 Worse than you'd think!
 
-To test this out I attached the [PIX D3D12 debugger](https://devblogs.microsoft.com/pix/) to Chrome and loaded up a WebGPU scene on one of my in-development pages. It rendered 5000 mesh instances with **412 indirect draw calls** in it's main render loop, which doesn't strike me as a particularly large number. But, crucially, the initial version of this page had every indirect draw call in it's own `GPUBuffer`. When capturing the frame in PIX you can immediately spot the large block of compute dispatches being performed at the beginning of the render pass (highlight here in green)
+To test this out I attached the [PIX D3D12 debugger](https://devblogs.microsoft.com/pix/) to Chrome and loaded up a WebGPU scene on one of my in-development pages. It rendered ~5000 mesh instances with **412 indirect draw calls** in it's main render loop, which doesn't strike me as a particularly large number. But, crucially, the initial version of this page had every indirect draw call in it's own `GPUBuffer`. When capturing the frame in PIX you can immediately spot the large block of compute dispatches being performed at the beginning of the render pass (highlighted here in green)
 
 ![Ouch](./media/indirect-validation-separate.png)
 
 What this shows is that of the ~6ms that it takes to execute the render pass on this device, ~3ms of that time is just performing indirect draw validation! A full 50% of the "render pass" time isn't doing any rendering!
 
-After a bit of refactoring, I combined all 412 indirect draw calls performed by the page to pull their arguments from the same `GPUBuffer` and captured the frame again. The results were dramatically different:
+After a bit of refactoring, I combined the args for all 412 indirect draw calls into the same `GPUBuffer` and captured the frame again. The results were dramatically different:
 
 ![Yay!](./media/indirect-validation-combined.png)
 
@@ -97,4 +97,4 @@ But the issue of validating args from different buffers is a fundamentally trick
 
 As mentioned previously, this bit of advice is targeted squarely at Chrome/Dawn on Windows. The other backends don't perform this particular bit of validation, and other WebGPU implementations may choose to address this in a different manner.
 
-But... it's not THAT difficult to batch the indirect args into larger buffers, and for the affected devices there's a *lot* of performance to be gained by doing so. And even on devices that don't have this validation step, making fewer, larger memory allocations is never going to be a bad thing for your performance. So go ahead and batch those args! Your (Chrome+Windows) users will thank you.
+But... it's not THAT difficult to batch the indirect args into larger buffers, and for the affected devices there's a *lot* of performance to be gained by doing so. And even on devices that don't have this validation step, making fewer, larger memory allocations is never going to be a bad thing for your performance. So go ahead and batch those args! Your (Chrome+Windows especially) users will thank you.
