@@ -427,4 +427,6 @@ Like labels, setting debug groups is pretty lightweight (assuming you don't go T
 
 One final thing to note about debug labels and groups is that D3D12, Metal, and Vulkan all have similar mechanisms. This means that WebGPU implementations can pass these values along to the underlying native APIs that they operate on top of. As a result, when using native GPU debugging tools such as [PIX](https://devblogs.microsoft.com/pix/) or [RenderDoc](https://renderdoc.org/) those tools will also be able to make use of the labels and groups that you set!
 
+See more in my documentation on [Profiling with PIX](../webgpu-profiling/pix).
+
 Fair warning: using such tools with a browser is tricky. The WebGPU data that they capture is likely to be mixed in with rendering commands for the rest of the page and the browser UI, and since WebGPU is not a 1:1 mapping of any of the native APIs the commands you issue to the GPU may be translated in unexpected ways. But having well labeled resources in your WebGPU app can make it much easier to find the corresponding native commands!
