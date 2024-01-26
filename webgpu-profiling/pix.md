@@ -2,6 +2,7 @@
 layout: page
 title: Profiling WebGPU with PIX
 menubar_toc: true
+comments: true
 ---
 
 > Note: These steps are largely adapted and expanded from this [incredibly helpful gist by Popov72](https://gist.github.com/Popov72/41f71cbf8d55f2cb8cae93f439eee347) and the [debug marker documentation from the Dawn repo](https://dawn.googlesource.com/dawn/+/refs/heads/chromium/4479/docs/debug_markers.md).
@@ -52,10 +53,11 @@ Now it's time to start debugging with PIX. If you haven't already, [download](ht
 
 ![Launching PIX as administrator](./media/pix-administrator.png)
 
- - In the "Select Target Process" panel, click the "Launch Wind32" tab and set the following fields:
+ - In the "Select Target Process" panel, click the "Launch Win32" tab and set the following fields:
     - Path to Executable: `<Chrome Dir>\chrome.exe`
     - Working Directory: `<Chrome Dir>`
     - Command Line Arguments: `--disable-gpu-sandbox --disable-gpu-watchdog`
+    - If you want to see readable shader code in the capture add `--enable-dawn-features=emit_hlsl_debug_symbols,disable_symbol_renaming` to the Command Line Arguments as well.
     - You may also want to put the address of the page you're profiling at the end of the command line arguments string, so that it navigates to it automatically on launch.
  - Make sure "Launch for GPU capture" is checked
  - Click "Launch"
