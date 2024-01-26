@@ -12,7 +12,7 @@ menubar_toc: true
 
 Since Chrome doesn't operate like your average game it takes a little it more jumping through hoops than usual to get PIX to play nicely with Chrome and capture our WebGPU pages, but the insight it can offer once you do is well worthwhile!
 
-### Which Chrome channel?
+## Which Chrome channel?
 
 First you should figure out what install of Chrome you're going to be profiling. It's not uncommon for developers to have multiple Chrome channels installed on their device, so take a moment to double check that you're using the right one.
 
@@ -20,7 +20,7 @@ The default install directories for each channel are:
 
  - Chrome Stable: `C:\Program Files\Google\Chrome\Application`
  - Chrome Beta: `C:\Program Files\Google\Chrome Beta\Application`
- - Chrome Dev: `"C:\Program Files\Google\Chrome Dev\Application"`
+ - Chrome Dev: `C:\Program Files\Google\Chrome Dev\Application`
  - Chrome Canary: `C:\Users\<username>\AppData\Local\Google\Chrome SxS\Application`
 
 We'll refer to whichever one you're using as `<Chrome Dir>`.
@@ -29,7 +29,7 @@ Also **make sure you completely exit any running instance** of the browser chann
 
 ![Fully exiting Chrome from the Windows status bar](./media/fully-exit-chrome.png)
 
-### Enabling Debug Markers
+## Enabling Debug Markers
 
 If you want to be able to see labels from WebGPU's [`pushDebugGroup()`/`popDebugGroup()` calls](https://gpuweb.github.io/gpuweb/#debug-markers) (and trust me, you do!) then you'll need to do one more bit of setup before we launch into PIX itself to enable Debug Markers.
 
@@ -42,7 +42,7 @@ If you want to be able to see labels from WebGPU's [`pushDebugGroup()`/`popDebug
 If there are more than one version folder in `<Chrome Dir>`, it's usually a safe bet to pick the larger number, but you can run that Chrome channel and visit `chrome://version` to be sure. Also, whenever your browser install updates you'll need to copy the DLL into the new version folder again. For Chrome Canary that can be multiple time per day!
 
 
-### Running Chrome in PIX
+## Running Chrome in PIX
 
 Now it's time to start debugging with PIX. If you haven't already, [download](https://devblogs.microsoft.com/pix/download/) and install it, then follow these steps:
 
@@ -76,7 +76,7 @@ Please keep in mind, however, that this capture represents the D3D12 commands th
 
 From here there's a lot you can do, such as view the values in buffers, see the state of a pass when an dreaw was issued, or see render targets be built up step-by-step. It's an incredibly powerful tool, and I don't have the time to cover even a fraction of what it can do here. For that you're better off looking through their [official docs](https://devblogs.microsoft.com/pix/documentation/).
 
-### Timelines and Debug Groups
+## Timelines and Debug Groups
 
 One thing I do want to highlight, however, is that you can see a timing breakdown of all the commands listed in the capture by clicking the "Click Here to start analysis and collect timing data." link in the bottom panel. This will produce a timeline that looks something like this:
 
@@ -124,6 +124,10 @@ Note that the debug groups can be nested! (See [WebGPU error handling best pract
 
 You can see each debug group I set here both in the timeline and in the list of captured commands, where each group can be collapsed and expanded for easier navigation. This makes it **far** easier to correlate the commands you see here with the ones being made by your page, and helps highlight where the majority of the GPU time is going in your page.
 
-### Good luck!
+## "The requested resource is in use"
+
+One last tip I'll leave you with is that if you start getting errors from PIX stating "The requested resource is in use" when trying to capture timing information, try temporarily disabling "Real-time protection" in Window's "Virus and Threat protection settings". This doesn't seem to be a super common problem, but it's one that I lost an hour or two of troubleshooting to, so I figured it was worth a mention here!
+
+## Good luck!
 
 This was just a brief overview of getting started with PIX, but I hope you found it useful. Graphics debuggers like this are a fantastic way to gain insight into the behaviors and performance of your WebGPU application, and I encourage everyone to make good use of them!
