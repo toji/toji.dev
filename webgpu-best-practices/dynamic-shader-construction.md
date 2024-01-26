@@ -3,6 +3,7 @@ layout: page
 title: WebGPU Dynamic Shader Construction
 subtitle: Best practices
 menubar_toc: true
+comments: true
 ---
 
 ## Introduction
@@ -252,7 +253,7 @@ const computePipeline = device.createComputePipeline({
 });
 ```
 
-Ultimately all of these uses can also be achived with template literals. The benefit that the overriable constants have is that they can be applied without recreating the shader module, which can improve performance when creating a large variety of pipeline variants. 
+Ultimately all of these uses can also be achived with template literals. The benefit that the overriable constants have is that they can be applied without recreating the shader module, which can improve performance when creating a large variety of pipeline variants.
 
 ## Use JavaScript modules string interpolation to reuse shader fragments
 

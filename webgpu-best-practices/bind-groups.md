@@ -2,6 +2,7 @@
 layout: page
 title: WebGPU Bind Group best practices
 menubar_toc: true
+comments: true
 ---
 
 ## Introduction

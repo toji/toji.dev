@@ -3,6 +3,7 @@ layout: page
 title: WebXR Scene Optimization
 subtitle: Tips on preparing 3D assets for the Immersive Web
 menubar_toc: true
+comments: true
 ---
 
 ## Introduction

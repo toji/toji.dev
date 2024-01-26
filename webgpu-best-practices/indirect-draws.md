@@ -2,6 +2,7 @@
 layout: page
 title: WebGPU Indirect Draw best practices
 menubar_toc: true
+comments: true
 ---
 
 ## TL;DR:

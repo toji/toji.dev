@@ -3,6 +3,7 @@ layout: page
 title: Efficiently rendering glTF models
 subtitle: A WebGPU Case Study
 menubar_toc: true
+comments: true
 ---
 
 <style>

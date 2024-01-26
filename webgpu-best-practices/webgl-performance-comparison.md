@@ -2,6 +2,7 @@
 layout: page
 title: WebGPU/WebGL performance comparison best practices
 menubar_toc: true
+comments: true
 ---
 
 ## Introduction

@@ -2,6 +2,7 @@
 layout: page
 title: Using WebGPU Compute Shaders with Vertex Data
 menubar_toc: true
+comments: true
 ---
 
 ## Introduction

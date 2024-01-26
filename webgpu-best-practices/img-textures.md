@@ -3,6 +3,7 @@ layout: page
 title: WebGPU &lt;img&gt;, &lt;canvas&gt;, and &lt;video&gt; Textures
 subtitle: Best practices
 menubar_toc: true
+comments: true
 ---
 
 ## Introduction

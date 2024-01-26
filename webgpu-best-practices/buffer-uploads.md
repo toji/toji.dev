@@ -3,6 +3,7 @@ layout: page
 title: WebGPU Buffer Uploads
 subtitle: Best practices
 menubar_toc: true
+comments: true
 ---
 
 ## Introduction
