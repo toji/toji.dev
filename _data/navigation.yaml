@@ -26,3 +26,5 @@
       link: webgpu-best-practices/webgl-performance-comparison
     - name: Indirect Draws
       link: webgpu-best-practices/indirect-draws
+    - name: Profiling with PIX
+      link: webgpu-profiling/pix
