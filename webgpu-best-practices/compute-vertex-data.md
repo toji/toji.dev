@@ -610,7 +610,7 @@ struct InputUniforms {
 
 @group(0) @binding(0) var<uniform> input: InputUniforms;
 @group(0) @binding(1) var<storage> positions: array<f32>;
-@group(0) @binding(2) var<storage> indices: array<f32>;
+@group(0) @binding(2) var<storage> indices: array<u32>;
 
 @group(0) @binding(3) var<storage, read_write> normals: array<vec3f>;
 
@@ -687,7 +687,7 @@ struct InputUniforms {
 
 @group(0) @binding(0) var<uniform> input: InputUniforms;
 @group(0) @binding(1) var<storage> positions: array<f32>;
-@group(0) @binding(2) var<storage> indices: array<f32>;
+@group(0) @binding(2) var<storage> indices: array<u32>;
 
 // UPDATED: Output is now i32 and atomic
 @group(0) @binding(3) var<storage, read_write> quantized_normals: array<atomic<i32>>;
