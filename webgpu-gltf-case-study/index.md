@@ -138,6 +138,7 @@ In WebGL, you would generally expect to upload the data from the `bufferView` po
 function drawGLTFMesh(gltf, node) {
   gl.useProgram(shaderProgram);
   gl.uniformMatrix4fv(modelMatrixLocation, false, getWorldTransformForNode(node));
+  gl.uniformMatrix4fv(normalMatrixLocation, false, getNormalTransformForNode(node));
 
   const mesh = gltf.meshes[node.mesh];
   for (const primitive of mesh.primitives) {
@@ -173,7 +174,7 @@ That code snippet is far from optimal, but the point is to show how the glTF dat
    - There's no good reason to keep the original glTF structures around for rendering. The values that are needed for the draw loop, like the primitive mode, draw count, and VAOs should be cached in a form that's easier to iterate through.
    - If all the meshes are using the same shader program it should be set outside of this function.
    - If you're using WebGL 2 you should be using uniform buffer objects (UBOs) instead of calling `uniformMatrix4fv()`.
-   - I sure hope that `getWorldTransformForNode()` method isn't recalculating the matrix from scratch every frame!
+   - I sure hope those `getWorldTransformForNode()` and `getNormalTransformForNode()` methods aren't recalculating the matrix from scratch every frame!
    - Yes, materials, camera uniforms, etc, are being completely ignored here. How long do you want this doc to be?!?
    - And finally many of the tips below about sorting buffers and reducing state changes ALSO apply to WebGL!
 </details><br/>
@@ -345,7 +346,11 @@ function getShaderModule() {
       @group(0) @binding(0) var<uniform> camera : Camera;
 
       // This comes from the bind groups being created in setupMeshNode in the next section.
-      @group(1) @binding(0) var<uniform> model : mat4x4f;
+      struct Model {
+        matrix: mat4x4f,
+        normalMat: mat4x4f,
+      }
+      @group(1) @binding(0) var<uniform> model : Model;
 
       // These locations correspond with the values in the ShaderLocations struct in our JS and, by
       // extension, the buffer attributes in the pipeline vertex state.
@@ -370,12 +375,12 @@ function getShaderModule() {
         var output : VertexOutput;
 
         // Transform the vertex position by the model/view/projection matrices.
-        output.position = camera.projection * camera.view * model * vec4f(input.position, 1);
+        output.position = camera.projection * camera.view * model.matrix * vec4f(input.position, 1);
 
-        // Transform the normal by the model and view matrices. Normally you'd just do model matrix,
+        // Transform the normal by the normal and view matrices. Normally you'd just do normal matrix,
         // but adding the view matrix in this case is a hack to always keep the normals pointing
         // towards the light, so that we can clearly see the geometry even as we rotate it.
-        output.normal = normalize((camera.view * model * vec4f(input.normal, 0)).xyz);
+        output.normal = (camera.view * model.normalMat * vec4f(input.normal, 0)).xyz;
 
         return output;
       }
@@ -411,7 +416,7 @@ function getShaderModule() {
 
 ### Transform bind groups
 
-Next, in order for each of the meshes to be rendered in the correct place, we also need to supply the shader with a matrix to transform them with. This transform comes from the node that the mesh is attached to, and is affected by the transform of every parent node above it in the node tree. (The combined node and node parent transform is commonly known as the "World Transform".)
+Next, in order for each of the meshes to be rendered in the correct place, we also need to supply the shader with matrices to transform them with. This transform comes from the node that the mesh is attached to, and is affected by the transform of every parent node above it in the node tree. (The combined node and node parent transform is commonly known as the "World Transform".) Additionally, we'll supply a matrix to transform the mesh normals by so that they are correctly oriented when the mesh is rotated. (This is the transpose inverse of the upper 3x3 of the meshes world matrix.)
 
 In WebGL you would most commonly set a uniform by calling `gl.uniformMatrix4fv()` that contains the transform matrix, but in WebGPU uniforms can only come from buffers (similar to WebGL 2's Uniform Buffer Objects.) So a uniform buffer with enough space for the matrix needs to be allocated and populated with the node's transform. The buffer is then made visible to the shader via a `GPUBindGroup`.
 
@@ -425,10 +430,11 @@ const nodeGpuData = new Map();
 function setupMeshNode(gltf, node) {
   // Create a uniform buffer for this node and populate it with the node's world transform.
   const nodeUniformBuffer = device.createBuffer({
-    size: 16 * Float32Array.BYTES_PER_ELEMENT,
+    size: 32 * Float32Array.BYTES_PER_ELEMENT,
     usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
   });
   device.queue.writeBuffer(nodeUniformBuffer, 0, getWorldTransformForNode(gltf, node));
+  device.queue.writeBuffer(nodeUniformBuffer, 16 * Float32Array.BYTES_PER_ELEMENT, getNormalTransformForNode(gltf, node));
 
   // Create a bind group containing the uniform buffer for this node.
   const bindGroup = device.createBindGroup({
@@ -1179,27 +1185,35 @@ If you're not familiar with the concept, Instancing in a graphics API is when yo
 
 When drawing instanced geometry, you need to provide something that communicates which data is different for each instance (otherwise why are you drawing the same thing over and over again?) There's two ways to do this: Either as a vertex buffer using `stepMode: 'instance'` in the pipeline's vertex state, or as an array in a uniform or storage buffer that you index into in the shader. For this document we'll take the latter approach since it maps a bit better to what we've already been doing.
 
-The concept is pretty simple. Previously in the vertex shader we were using a uniform buffer to communicate the model matrix for every draw call, as shown in this simplified shader:
+The concept is pretty simple. Previously in the vertex shader we were using a uniform buffer to communicate the model and normal matrix for every draw call, as shown in this simplified shader:
 
 ```rust
-@group(1) @binding(0) var<uniform> modelMatrix : mat4x4f;
+struct Model {
+  matrix: mat4x4f,
+  normalMat: mat4x4f,
+}
+@group(1) @binding(0) var<uniform> model : Model;
 
 @vertex
 fn vertexMain(@location(0) position : vec3f) -> @builtin(position) vec4f {
   // Omitting things like applying the view and projection transforms for simplicity.
-  return modelMatrix * vec4f(position, 1);
+  return model.matrix * vec4f(position, 1);
 }
 ```
 
-All we need to do to take advantage of instancing is change that `modelMatrix` uniform from a single matrix into an array of them, then use the [WGSL builtin `instance_index` value](https://www.w3.org/TR/WGSL/#builtin-values) to index into it.
+All we need to do to take advantage of instancing is change that `model` uniform from the matrices for a single model into an array of them, then use the [WGSL builtin `instance_index` value](https://www.w3.org/TR/WGSL/#builtin-values) to index into it.
 
 ```rust
-@group(1) @binding(0) var<storage> modelMatrices : array<mat4x4f>;
+struct Model {
+  matrix: mat4x4f,
+  normalMat: mat4x4f,
+}
+@group(1) @binding(0) var<storage> instances : array<Model>;
 
 @vertex
 fn vertexMain(@location(0) position : vec3f,
               @builtin(instance_index) instance : u32) -> @builtin(position) vec4f {
-  return modelMatrices[instance] * vec4f(position, 1);
+  return instances[instance].matrix * vec4f(position, 1);
 }
 ```
 
@@ -1229,7 +1243,7 @@ function setupMeshNode(gltf, node, primitiveInstances) {
       instances = [];
       primitiveInstances.set(primitive, instances);
     }
-    instances.push(node.worldMatrix);
+    instances.push(node);
   }
 }
 ```
@@ -1245,7 +1259,7 @@ function setupPrimitiveInstances(primitive, primitiveInstances) {
 
   // Create a buffer large enough to contain all the instance matrices.
   const instanceBuffer = this.device.createBuffer({
-    size: 16 * Float32Array.BYTES_PER_ELEMENT * count,
+    size: 32 * Float32Array.BYTES_PER_ELEMENT * count,
     usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
     mappedAtCreation: true,
   });
@@ -1253,7 +1267,8 @@ function setupPrimitiveInstances(primitive, primitiveInstances) {
   // Loop through each instance and copy it into the instance buffer.
   const instanceArray = new Float32Array(instanceBuffer.getMappedRange());
   for (let i = 0; i < count; ++i) {
-    instanceArray.set(instances[i], i * 16);
+    instanceArray.set(instances[i].worldMatrix, i * 32);
+    instanceArray.set(instances[i].normalMatrix, i * 32 + 16);
   }
   instanceBuffer.unmap();
 
@@ -1345,7 +1360,7 @@ function setupMeshNode(gltf, node, primitiveInstances) {
       instances = [];
       primitiveInstances.matrices.set(primitive, instances);
     }
-    instances.push(node.worldMatrix);
+    instances.push(node);
   }
   // Make sure to add the number of matrices used for this mesh to the total.
   primitiveInstances.total += mesh.primitives.length;
@@ -1357,7 +1372,7 @@ And then after collecting all of the matrices in the scene create a single buffe
 ```js
 // Create a buffer large enough to contain all the instance matrices for the entire scene.
 const instanceBuffer = device.createBuffer({
-  size: 16 * Float32Array.BYTES_PER_ELEMENT * primitiveInstances.total,
+  size: 32 * Float32Array.BYTES_PER_ELEMENT * primitiveInstances.total,
   usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
   mappedAtCreation: true,
 });
@@ -1380,7 +1395,8 @@ function setupPrimitiveInstances(primitive, primitiveInstances) {
 
   // Place the matrices in the instances buffer at the given offset.
   for (let i = 0; i < count; ++i) {
-    primitiveInstances.arrayBuffer.set(instances[i], (first + i) * 16);
+    primitiveInstances.arrayBuffer.set(instances[i].worldMatrix, (first + i) * 32);
+    primitiveInstances.arrayBuffer.set(instances[i].normalMatrix, (first + i) * 3 + 16);
   }
 
   // Update the offset for the next primitive.
@@ -1958,9 +1974,9 @@ struct VertexOutput {
 fn vertexMain(input : VertexInput) -> VertexOutput {
   var output : VertexOutput;
 
-  let modelMatrix = model[input.instance];
-  output.position = camera.projection * camera.view * modelMatrix * vec4f(input.position, 1);
-  output.normal = normalize((camera.view * modelMatrix * vec4f(input.normal, 0)).xyz);
+  let model = instances[input.instance];
+  output.position = camera.projection * camera.view * model.matrix * vec4f(input.position, 1);
+  output.normal = (camera.view * model.normalMat * vec4f(input.normal, 0)).xyz;
 
   // Copy the texcoord to the fragment shader without change.
   output.texcoord = input.texcoord;
@@ -2123,9 +2139,9 @@ let code = wgsl`
   fn vertexMain(input : VertexInput) -> VertexOutput {
     var output : VertexOutput;
 
-    let modelMatrix = model[input.instance];
-    output.position = camera.projection * camera.view * modelMatrix * vec4f(input.position, 1);
-    output.normal = normalize((camera.view * modelMatrix * vec4f(input.normal, 0)).xyz);
+    let model = instances[input.instance];
+    output.position = camera.projection * camera.view * model.matrix * vec4f(input.position, 1);
+    output.normal = normalize((camera.view * model.normalMat * vec4f(input.normal, 0)).xyz);
 
     #if ${args.hasTexcoord}
       output.texcoord = input.texcoord;
