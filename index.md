@@ -35,4 +35,4 @@ Almost everything I work on is open source, with the majority of it being either
 <a rel="me" href="https://mastodon.social/@tojiro"></a>
 
 ## Me on Mastodon
-<iframe allowfullscreen sandbox="allow-top-navigation allow-scripts allow-popups allow-popups-to-escape-sandbox" width="400" height="800" src="https://mastofeed.com/apiv2/feed?userurl=https%3A%2F%2Fmastodon.social%2Fusers%2Ftojiro&theme=light&size=100&header=true&replies=false&boosts=false"></iframe>
+<iframe allowfullscreen sandbox="allow-top-navigation allow-scripts allow-popups allow-popups-to-escape-sandbox" height="800" style="width: 100%" src="https://mastofeed.com/apiv2/feed?userurl=https%3A%2F%2Fmastodon.social%2Fusers%2Ftojiro&theme=light&size=100&header=false&replies=false&boosts=false"></iframe>
