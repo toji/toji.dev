@@ -663,7 +663,7 @@ function createSceneBindGroups(meshes) {
 
     // Create a bind group for the mesh's transform
     mesh.bindGroup = gpuDevice.createBindGroup({
-      layout: pipelineLayout,
+      layout: meshBindGroupLayout,
       entries: [{
         binding: 0,
         resource: { buffer: mesh.modelMatrixBuffer },
