@@ -4,11 +4,11 @@
       link: https://mastodon.social/@tojiro
     - name: Bluesky
       link: https://bsky.app/profile/tojiro.bsky.social
-    - name: Twitter
-      link: https://twitter.com/Tojiro
     - name: Github
       link: https://github.com/toji
-    - name: Old Blog (abandoned)
+    - name: Twitter (inactive)
+      link: https://twitter.com/Tojiro
+    - name: Old Blog (inactive)
       link: http://tojicode.com/
 - label: Tech Writing
   items:
