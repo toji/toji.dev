@@ -28,7 +28,7 @@ twitter_username: tojiro
 github_username:  toji
 
 # Build settings
-remote_theme: chrisrhymes/bulma-clean-theme
+remote_theme: chrisrhymes/bulma-clean-theme@v0.14.0
 plugins:
   - jekyll-remote-theme
 
