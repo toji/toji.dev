@@ -55,8 +55,7 @@ That's why if you are doing performance comparisons it's best to confirm that bo
 // Log basic GPU identification to the console
 
 // WebGPU
-const adapterInfo = await adapter.requestAdapterInfo();
-console.log(`WebGPU vendor: ${adapterInfo.vendor}, architecture: ${adapterInfo.architecture}`);
+console.log(`WebGPU vendor: ${adapter.info.vendor}, architecture: ${adapter.info.architecture}`);
 // Outputs something like "vendor: intel, architecture: gen-12lp"
 
 // WebGL

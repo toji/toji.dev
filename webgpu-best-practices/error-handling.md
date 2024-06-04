@@ -205,7 +205,7 @@ device.addEventListener('uncapturederror', (event) => {
 
 Like Error Scopes, listening to the `uncapturederror` event will prevent errors from showing up in the console, which may or may not be part of the desired effect for your app. If you want to ensure that the messages continue showing up in the console you'll need to repeat them yourself as shown in the above code snippet.
 
-(Side note: If you are gathering errors for telemetry purposes it may also be beneficial to pair it with adapter information from [`adapter.requestAdapterInfo()`](https://gpuweb.github.io/gpuweb/#dom-gpuadapter-requestadapterinfo) so that you can see if there's a pattern behind what device types are seeing errors most frequently.)
+(Side note: If you are gathering errors for telemetry purposes it may also be beneficial to pair it with adapter information from [`adapter.info`](https://gpuweb.github.io/gpuweb/#dom-gpuadapter-info) so that you can see if there's a pattern behind what device types are seeing errors most frequently.)
 
 ## Shaders are special
 
