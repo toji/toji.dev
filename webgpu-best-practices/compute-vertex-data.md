@@ -82,7 +82,7 @@ Conveniently, we don't have to worry about the exact layout of the data when we'
 
 That flexibility is convenient when it comes to rendering work, but can become quite difficult to deal with should you try to manipulate that same data with a compute shader.
 
-## Compute shader vertex manipluation basics
+## Compute shader vertex manipulation basics
 
 Let's start with a fairly trivial task: Assume that the normal data from our example above is inverted for some reason, and we want to fix it in a compute shader. That's something you can fix pretty easily at render time in the vertex shader, but it serves as a convenient illustration of how the process would work.
 
