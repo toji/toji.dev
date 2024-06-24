@@ -1,0 +1,9 @@
+---
+layout: none
+---
+User-agent: GPTBot
+User-agent: GPTBot-User
+User-agent: ChatGPT
+User-agent: ChatGPT-User
+User-agent: Google-Extended
+Disallow: /
