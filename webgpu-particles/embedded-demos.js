@@ -5,11 +5,16 @@
 // and shut them down so that the user doesn't end up with 50 separate samples
 // all using WebGPU resources at the same time.
 const sampleElements = new Map();
+const autoplayCheckbox = document.getElementById('autoplaySamples');
 const intersectionObserver = new IntersectionObserver((entries) => {
   for (entry of entries) {
     const sample = sampleElements.get(entry.target);
-    if (sample && !entry.isIntersecting) {
-      sample.stop();
+    if (sample) {
+      if (!entry.isIntersecting) {
+        sample.stop();
+      } else if (autoplayCheckbox.checked) {
+        sample.start();
+      }
     }
   }
 });
