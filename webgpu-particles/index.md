@@ -174,7 +174,7 @@ You can click and drag to rotate them and scroll/pinch to zoom. And that's reall
   And that gives us the example above!
 </details>
 
-## [Next: Particle Basics](./basics)
+<a class='button is-primary next-page' href='./basics'>Particle Basics</a>
 
 <!--Must be at the bottom of the article or it won't pick up the demo links-->
 <script src='embedded-demos.js'></script>

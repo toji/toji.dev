@@ -49,3 +49,24 @@ aside {
   margin-top: -1em;
   z-index: 2;
 }
+
+.next-page, .prev-page {
+  display: inline-block;
+  font-weight: bold;
+}
+
+.next-page {
+  float: right;
+}
+
+.next-page::before {
+  content: 'Next: ';
+}
+
+.next-page::After {
+  content: ' >>';
+}
+
+.prev-page::before {
+  content: '<< Previous: ';
+}
