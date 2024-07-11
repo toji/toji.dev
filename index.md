@@ -6,6 +6,22 @@ show_sidebar: false
 menubar: home_menu
 ---
 
+<style>
+/* Profile picture */
+aside.menu::before {
+  content: '';
+  position: relative;
+  display: block;
+  background: url('/assets/images/color-profile-circle.png') no-repeat;
+  background-size: contain;
+  height: aspect(1);
+  width: 100%;
+  max-width: 300px;
+  aspect-ratio: 1 / 1;
+  margin-bottom: 1em;
+}
+</style>
+
 # Hi!
 
 I'm Brandon Jones, frequently known by the username "toji" or "tojiro" on various parts of the web, and this is my "About Me" page. I also host some of my tech writing about WebGPU and WebXR here.

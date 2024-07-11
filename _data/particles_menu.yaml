@@ -1,0 +1,6 @@
+- label: WebGPU Particles
+  items:
+    - name: Introduction
+      link: /webgpu-particles/
+    - name: Particle Basics
+      link: /webgpu-particles/basics

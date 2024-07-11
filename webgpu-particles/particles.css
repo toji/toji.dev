@@ -1,0 +1,51 @@
+img {
+  display: block;
+  min-width: 75%;
+  border-radius: 5px;
+  margin: auto;
+}
+
+.demo-link img {
+  width: 100%;
+}
+
+.embedded-demo {
+  width: 100%;
+  display: relative;
+}
+
+.embedded-demo iframe {
+  width: 100%;
+  aspect-ratio: 4/3;
+  border-radius: 5px;
+  background-color: rgb(2,0,36);
+  background-size: cover;
+  background-position: center;
+}
+
+.embedded-demo button {
+  cursor: pointer;
+  border: 0;
+  background-color: transparent;
+  font-weight: bold;
+}
+
+.run-button {
+  position: relative;
+  font-size: 5em;
+  float: right;
+  margin-top: -1.6em;
+  z-index: 2;
+}
+
+aside {
+  margin-bottom: 1em;
+}
+
+.stop-button {
+  position: relative;
+  font-size: 2em;
+  float: right;
+  margin-top: -1em;
+  z-index: 2;
+}

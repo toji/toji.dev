@@ -6,20 +6,6 @@
   background-size: contain;
 }*/
 
-/* Profile picture */
-aside.menu::before {
-  content: '';
-  position: relative;
-  display: block;
-  background: url('/assets/images/color-profile-circle.png') no-repeat;
-  background-size: contain;
-  height: aspect(1);
-  width: 100%;
-  max-width: 300px;
-  aspect-ratio: 1 / 1;
-  margin-bottom: 1em;
-}
-
 @media screen and (max-width: 770px) {
   aside.menu::before {
     display: none;

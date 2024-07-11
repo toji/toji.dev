@@ -1,11 +1,23 @@
 // Scan through the full document, find any images that link to demo pages, then convern them into play buttons which
 // will show the demo inline in an iframe when clicked
 
+const menu = document.querySelector('aside');
+
+const autoplayCheckbox = document.createElement('input');
+autoplayCheckbox.type = 'checkbox';
+autoplayCheckbox.id = 'autoplaySamples';
+autoplayCheckbox.checked = true;
+const autoplayLabel = document.createElement('label');
+autoplayLabel.for = 'autoplaySamples';
+autoplayLabel.innerText = ' Autoplay Samples';
+
+menu.parentElement.appendChild(autoplayCheckbox);
+menu.parentElement.appendChild(autoplayLabel);
+
 // Use an IntersectionObserver to determine when samples are scrolled off the
 // and shut them down so that the user doesn't end up with 50 separate samples
 // all using WebGPU resources at the same time.
 const sampleElements = new Map();
-const autoplayCheckbox = document.getElementById('autoplaySamples');
 const intersectionObserver = new IntersectionObserver((entries) => {
   for (entry of entries) {
     const sample = sampleElements.get(entry.target);
