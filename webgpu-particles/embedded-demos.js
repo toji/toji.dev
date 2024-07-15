@@ -3,6 +3,10 @@
 
 const menu = document.querySelector('aside');
 
+const isLocalhost = window.location.hostname === 'localhost';
+
+const localSampleHostname = 'http://localhost:8080/personal'
+
 const autoplayCheckbox = document.createElement('input');
 autoplayCheckbox.type = 'checkbox';
 autoplayCheckbox.id = 'autoplaySamples';
@@ -33,6 +37,10 @@ const intersectionObserver = new IntersectionObserver((entries) => {
 
 const demoLinks = document.querySelectorAll('.demo-link');
 for (const link of demoLinks) {
+  let href = new URL(link.href);
+  if (isLocalhost) {
+    href = new URL(`${localSampleHostname}${href.pathname}`);
+  }
   const container = document.createElement('div');
   container.classList.add('embedded-demo');
 
@@ -61,7 +69,7 @@ for (const link of demoLinks) {
     // Load up the iframe when you click the button
     runButton.style.display = 'none';
     stopButton.style.display = '';
-    iframe.src = link.href;
+    iframe.src = href.toString();
   };
   runButton.addEventListener('click', start);
 
@@ -77,7 +85,7 @@ for (const link of demoLinks) {
   intersectionObserver.observe(iframe);
 
   const newTab = document.createElement('a');
-  newTab.href = link.href;
+  newTab.href = href.toString();
   newTab.target = '_blank';
   newTab.innerText = 'Open in new tab';
   container.appendChild(newTab);

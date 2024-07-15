@@ -74,6 +74,9 @@ export class ParticleDemo {
 
   onFrame(device: GPUDevice, context: GPUCanvasContext, delta: number) {
     // Per-frame logic and rendering goes here
+
+    // delta is the time in seconds since the last onFrame call, expected to be
+    // something like 0.016 for an app running at 60 FPS.
   }
 }
 ```
