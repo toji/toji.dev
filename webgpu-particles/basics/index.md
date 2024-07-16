@@ -9,15 +9,16 @@ comments: true
 ---
 
 <link rel="stylesheet" href="../particles.css">
+<script src='../embedded-demos.js'></script>
 
-Now that we have a simple environment to work in, let's get started on the star of the show: the particles!
+Now that we have the intro out of the way, let's move on to the star of the show: the particles!
 
 ## Initializing Particles
 As a first step, we're only going to initialize a set of particles to some easy-to-verify state and draw them as simple white squares. Not particularly exciting or pretty, but it'll give us a good starting point to layer more interesting features onto!
 
-The first task will be figuring out how to store our particles. We already mentioned that in the past particle systems were largely designed to be stored in textures, and we could do that here, but really buffers are a better fit if we want flexibility. WebGPU buffers can be used for a variety of things, such as vertices, indices, or uniforms, but if you want to write to a buffer from a shader (and we do) you need to use what's known as a "storage" buffer.
+The first task will be figuring out how to store our particles. We already mentioned that in the past GPU-driven particle systems were largely designed to be stored in textures. We could still do that here, but really buffers are a better fit if we want flexibility. WebGPU buffers can be used for a variety of things, such as vertices, indices, or uniforms, but if you want to write to a buffer from a shader (and we do) you need to use what's known as a "storage" buffer.
 
-Using a storage buffer will allow us to lay out in shader code both the structure of each particle and declare an read/write array of them. The struct should contain every value that is needed to represent a single particle, like position, velocity, color, etc. Though for the moment we can just start with the bare minimum, a position:
+Using a storage buffer will allow us to lay out in shader code both the structure of each particle and declare a readable/writeable array of them. The struct should contain every value that is needed to represent a single particle, like position, velocity, color, etc. Though for the moment we can just start with the bare minimum, a position:
 
 ```rs
 // WGSL shader
@@ -28,13 +29,11 @@ struct Particle {
 @group(1) @binding(0) var<storage, read_write> particles: array<Particle>;
 ```
 
-Because `position` is the only member we just as easily could have declared the storage binding as an `array<vec3f>`, but we can also predict that we'll be expanding that in the very near future so it makes sense to use a struct from the very beginning.
+> **Note:** Because `position` is the only member we just as easily could have declared the storage binding as an `array<vec3f>`, but we can also predict that we'll be expanding that in the very near future so it makes sense to use a struct from the very beginning.
 
-To create the buffer needed to bind to that array, we need to know how big it should be. Fortunately, that's pretty simple, it's just the size in bytes of a single particle times the maximum number of particles we want our system to handle. We can just pick an arbitrary number for our max particle count, like 1000.
+To create the buffer needed to bind to that array, we need to know how big it should be. At minimum it needs to be the size in bytes of a single particle times the maximum number of particles we want our system to handle. For our max particle count We can just pick an arbitrary number, like 1000. (We're starting small.) The size of the particle struct can be trickier, and requires you to know the [alignment and size rules](https://www.w3.org/TR/WGSL/#alignment-and-size) used by WGSL. For example a `vec3f` in WGSL takes 12 bytes (4 bytes per `f32` * 3) but must align on 16 byte boundaries. So the array will need **16 bytes per particle** even though the only member is technically 12 bytes in size.
 
-The size of the particle struct can be trickier, and requires you to know the [alignment and size rules](https://www.w3.org/TR/WGSL/#alignment-and-size) used by WGSL. For example a `vec3f` in WGSL takes 12 bytes (4 bytes per `f32` * 3) but must align on 16 byte boundaries. So the array will need **16 bytes per particle** even though the only member is technically 12 bytes in size.
-
-If this kind of size calculation sounds complicated, then I highly recommend making use of [WebGPU Fundamentals' Offset Computer](https://webgpufundamentals.org/webgpu/lessons/resources/wgsl-offset-computer.html#x=5d00000100f200000000000000003d888b0237284d3025f2381bcb288a12586e1dfe1d0334d1445ee31ad5803c7e94d7c23387ff226438a6b544e8abab884002cb4bbaa4861f05ecebc7592f2c0b63b1f3615d836981b1de7edf9b1feec3b6a8c75c6d618cea38f947fc8a49859041e05233a5360f58edd3f20c285745a052f789d3731497c85b60f88ddcdf8f9b1b74d7ab8000f6dae6f7cdb4bab5315664adb2ec2bcbe70e92d03013a6c16100d9df9bedb16318e624845b535346a4fef97c65), which lets you plug in your own struct and see an easy-to-understand visualization of how the values are laid out by WGSL.
+If this kind of size calculation sounds confusing, then I highly recommend making use of [WebGPU Fundamentals' Offset Computer](https://webgpufundamentals.org/webgpu/lessons/resources/wgsl-offset-computer.html#x=5d00000100f200000000000000003d888b0237284d3025f2381bcb288a12586e1dfe1d0334d1445ee31ad5803c7e94d7c23387ff226438a6b544e8abab884002cb4bbaa4861f05ecebc7592f2c0b63b1f3615d836981b1de7edf9b1feec3b6a8c75c6d618cea38f947fc8a49859041e05233a5360f58edd3f20c285745a052f789d3731497c85b60f88ddcdf8f9b1b74d7ab8000f6dae6f7cdb4bab5315664adb2ec2bcbe70e92d03013a6c16100d9df9bedb16318e624845b535346a4fef97c65), which lets you plug in your own struct and see an easy-to-understand visualization of how the values are laid out by WGSL. This is how it visualizes our simple particle struct:
 
 ![Size of our particle struct as calculated by the offset computer](../media/offset-computer-1.png)
 
@@ -42,7 +41,7 @@ Or, a more complex example from later on in this article:
 
 ![Size of a more complex particle struct as calculated by the offset computer](../media/offset-computer-2.png)
 
-And now that we know the number of particles we're tracking and the size of each we can create an appropriate buffer to hold them:
+Now that we know the number of particles we're tracking and the size of each we can create an appropriate buffer to hold them:
 
 ```ts
 // We'll use these values in a couple of places, so it's useful to delare them as constants.
@@ -57,17 +56,40 @@ class ParticleDemo {
       // Enough room to store 1000 particles
       size: MAX_PARTICLE_COUNT * BYTES_PER_PARTICLE,
       // STORAGE usage for the compute binding
-      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+      usage: GPUBufferUsage.STORAGE,
     });
   }
 }
 ```
 
-When that buffer is created it will automatically be filled with zeros, which means if we tried to render our "particles" at this point they'd all be in the same spot: at the origin. That's not terribly interesting, so lets initialize them with some better values. A really straightfoward starting point would be to organize the particles into a 10x10x10 grid. That way you'll be able to tell very quickly if your particle data is what you expect it to be just by glancing at the rendered output.
+We can also build a corresponding Bind Group Layout and Bind Group to expose the resources we need (for now just the particle buffer) to a compute shader.
 
-Now we _could_ initialize those values from JavaScript, setting the appropriate coordinates into a `Float32Array` that's the same size (in bytes) as the buffer and copying it to the buffer's GPU memory with `device.queue.writeBuffer()`. And in some cases that might be the best approach! For example: If you want a very specific initialization data for all of your particles that's read from a file.
+> **Note:** If you're not familiar with Bind Groups and Bind Group Layouts yet, or simply want to understand better why they're set up the way they are, check out my [Bind Group best practices article](../../webgpu-best-practices/bind-groups).
 
-But because the initial data that we want (10x10x10 grid) is easily computed, it'll be just as easy for us to do the initialization via a compute shader. And that will set us up better for future changes as well!
+```ts
+// In onInit(), after creating particleBuffer...
+const particleComputeBindGroupLayout = device.createBindGroupLayout({
+  label: 'Particle Compute',
+  entries: [{
+    binding: 0,
+    visibility: GPUShaderStage.COMPUTE,
+    buffer: { type: 'storage' }
+  }]
+});
+
+this.particleComputeBindGroup = device.createBindGroup({
+  label: 'Particle Compute',
+  layout: particleComputeBindGroupLayout,
+  entries: [{
+    binding: 0,
+    resource: { buffer: this.particleBuffer }
+  }]
+});
+```
+
+A word of caution: This is an area where it might feel like it would be OK to use `layout: 'auto'` when creating the compute pipeline in an upcoming step instead of manually building out the Bind Group Layout here, which can feel like a chore. Don't do it! In future revisions of the code we'll want to share this bind group between multiple compute shaders, and the only way to do that is with an explicit layout.
+
+And now we can consider how to initialize the particle buffer contents. When that buffer is created it will automatically be filled with zeros, which means if we tried to render our "particles" at this point they'd all be in the same spot: at the origin. That's not terribly interesting, so lets initialize them with some better values. A really straightfoward starting point would be to organize the particles into a 10x10x10 grid. That way you'll be able to tell very quickly if your particle data is what you expect it to be just by glancing at the rendered output.
 
 FIXME
 
@@ -95,30 +117,9 @@ fn particleInit(@builtin(global_invocation_id) globalId : vec3u) {
 }
 ```
 
-FIXME
+> **Note:** We _could_ initialize the particle buffer values from JavaScript, setting the appropriate coordinates into an `ArrayBuffer` that's the same size (in bytes) as the particle buffer and copying it to the buffer's GPU memory with `device.queue.writeBuffer()`. In fact, in some cases that might be the best approach! For example: If you want a very specific initialization data for all of your particles that's read from a file. But in most cases where the particle's initial state can be easily computed, a compute shader is probably more efficient.
 
-```ts
-// In onInit()
-const particleComputeBindGroupLayout = device.createBindGroupLayout({
-  label: 'Particle Compute',
-  entries: [{
-    binding: 0,
-    visibility: GPUShaderStage.COMPUTE,
-    buffer: { type: 'storage' }
-  }]
-});
-
-this.particleComputeBindGroup = device.createBindGroup({
-  label: 'Particle Compute',
-  layout: particleComputeBindGroupLayout,
-  entries: [{
-    binding: 0,
-    resource: { buffer: this.particleBuffer }
-  }]
-});
-```
-
-FIXME
+Next we want to create the compute pipeline using the layout and shader we created above. Because I'm using override contants without defaults in the shader above I need to populate them here using the JavaScript constants I've been declaring at the top of my source file. This provides a really clean way of keeping the constants synced up between WGSL and JavaScript.
 
 ```ts
 // In onInit()
@@ -141,6 +142,8 @@ this.particleInitPipeline = device.createComputePipeline({
   }
 });
 ```
+
+> **Note:** Alternatively you could use JavaScript's [Template Literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals) to inject the constant values directly into the shader source. Read more about these types of WGSL shader building techniques in my [Dynamic Shader Construction article](https://toji.dev/webgpu-best-practices/dynamic-shader-construction).
 
 Once we have the pipeline, we'll want to dispatch it once at the end of our `onInit()` method to initialize the buffer data. I find it clearer to move those calls into their own function, like so:
 
@@ -409,7 +412,4 @@ FIXME
 </a>
 
 <a class='button is-primary prev-page' href='../'>Introduction</a>
-<a class='button is-primary next-page' href='../basics'>Particle Basics</a>
-
-<!--Must be at the bottom of the article or it won't pick up the demo links-->
-<script src='../embedded-demos.js'></script>
+<a class='button is-primary next-page' href='../basics/'>Particle Basics</a>

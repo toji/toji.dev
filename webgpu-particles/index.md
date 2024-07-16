@@ -9,6 +9,7 @@ comments: true
 ---
 
 <link rel="stylesheet" href="particles.css">
+<script src='embedded-demos.js'></script>
 
 ## Introduction
 
@@ -21,7 +22,7 @@ A [particle system](https://en.wikipedia.org/wiki/Particle_system) is a commonly
 
 Take this short GIF from _The Legend of Zelda: Breath of the Wild_
 
-![Link making a guardian go boom](media/zelda-explode.gif)
+![Link making a Guardian go boom](media/zelda-explode.gif)
 
 A huge chunk of what you see there is made up of particles!
 
@@ -55,14 +56,17 @@ There were efficiency issues as well, since it was more difficult to control the
 
 With compute shaders we can more naturally express the types of operations we want to perform with data that is more easily structured in the format that we want, and more easily limit it to the data ranges we care about. It's not without it's own caveats, but in almost every way it's an improvement that offers easier development and better performance potential. (And hey, if you really want to do everything in a render pass still WebGPU will gladly oblige.)
 
+### What you need to know first
+This article _isn't_ a general WebGPU tutorial, so you should ideally have at least a little bit of experience with it before hand. If you're a complete WebGPU beginner I'd recommend looking through the [Your first WebGPU app](https://codelabs.developers.google.com/your-first-webgpu-app) codelab I wrote for Google I/O to learn some of the absolute basics or rendering and compute with WebGPU. Alternatively, you can check out [WebGPU Fundamentals](https://webgpufundamentals.org/) for a more in-depth (and more interactive!) set of tutorials.
+
+Either way, once you know how to render a couple of triangles and have at least a fuzzy idea of how a compute shader works is you'll be in a good spot to follow along with this article!
+
 ### There's no "right way".
 One last important thing to note before we get started: This article will not teach you the "right way" to do things. That's because _there is no single, universally agreed upon, correct way to do these things!_ That applies not only to gpu-driven particle systms, but any GPU API usage! (And, in fact, software development in general.) Everything we build is a series of trade-offs: sacrificing flexibility for performance, increasing complexity in favor of expressiveness, taking shortcuts because we know we won't need features, etc. Only you know about your unique goals and constraints, and so only you can gauge how to best satisfy them.
 
 All of which is to say that nothing I write here should be seen as an authoritive statement of the _only_ way to accomplish our task. Instead, I'll do my best to explain why I make the choices I do and talk about alternative approaches where appropriate. The goal is to help you better understand some of the considerations that go into designing these sorts of systems so that you can make well informed decisions in your own code!
 
-So with that said, let's get started!
-
-## Setting up
+## Example structure
 
 I'll be using a small demo "base" class to run the examples embedded throughout this article. You don't have to be familiar with it to follow along, just know that I'll be structuring everything like so:
 
@@ -81,9 +85,9 @@ export class ParticleDemo {
 }
 ```
 
-_**Note**: I'll be formatting my code snippets as TypeScript purely out of personal preference, but rest assured that everything we'll be talking about applies to vanilla JavaScript as well._
+> **Note**: I'll be formatting my code snippets as TypeScript purely out of personal preference, but rest assured that everything we'll be talking about applies to vanilla JavaScript as well.
 
-Things like WebGPU device creation, canvas resizing, input handling, and so on aren't the focus here, so they're largely going to be omitted. If you want to learn more about those aspects of using WebGPU first, may I suggest the excellent [WebGPU Fundamentals](https://webgpufundamentals.org/)?
+Things like WebGPU device creation, canvas resizing, input handling, and so on aren't the focus here, so they're largely going to be omitted. Again, see the [What you need to know first](#what-you-need-to-know-first) section above if you want to read up on any of that.
 
 Embedded examples will show up like this:
 
@@ -91,7 +95,7 @@ Embedded examples will show up like this:
   <img src='media/sample-00.png' />
 </a>
 
-You can click and drag to rotate them and scroll/pinch to zoom. And that's really all you need to know!
+You can click and drag to rotate them and scroll/pinch to zoom, and each example will include a "View Source" button that will take you to the code running that particular example on [GitHub](https://github.com/toji/webgpu-particles/). And that's really all you need to know!
 
 <details markdown=block>
   <summary markdown=span><b>Click here if you want to learn more about how the demo base class works</b></summary>
@@ -177,7 +181,4 @@ You can click and drag to rotate them and scroll/pinch to zoom. And that's reall
   And that gives us the example above!
 </details>
 
-<a class='button is-primary next-page' href='./basics'>Particle Basics</a>
-
-<!--Must be at the bottom of the article or it won't pick up the demo links-->
-<script src='embedded-demos.js'></script>
+<a class='button is-primary next-page' href='./basics/'>Particle Basics</a>
