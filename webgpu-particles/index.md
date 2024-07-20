@@ -92,7 +92,7 @@ Things like WebGPU device creation, canvas resizing, input handling, and so on a
 Embedded examples will show up like this:
 
 <a class='demo-link' href='https://toji.github.io/webgpu-particles/0.html'>
-  <img src='media/sample-00.png' />
+  <img src='media/00-01.png' />
 </a>
 
 You can click and drag to rotate them and scroll/pinch to zoom, and each example will include a "View Source" button that will take you to the code running that particular example on [GitHub](https://github.com/toji/webgpu-particles/). And that's really all you need to know!
@@ -181,4 +181,4 @@ You can click and drag to rotate them and scroll/pinch to zoom, and each example
   And that gives us the example above!
 </details>
 
-<a class='button is-primary next-page' href='./basics/'>Particle Basics</a>
+<a class='button is-primary next-page' href='./01-setup/'>Setting up</a>

@@ -2,5 +2,7 @@
   items:
     - name: Introduction
       link: /webgpu-particles/
-    - name: Particle Basics
-      link: /webgpu-particles/basics/
+    - name: Setting Up
+      link: /webgpu-particles/01-setup/
+    - name: Particle Movement
+      link: /webgpu-particles/02-movement/
