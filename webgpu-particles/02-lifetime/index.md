@@ -1,7 +1,7 @@
 ---
 layout: page
 title: WebGPU Particle Systems
-subtitle: Particle Movement
+subtitle: Particle Lifetime
 show_sidebar: false
 menubar: particles_menu
 toc: true
@@ -71,3 +71,4 @@ FIXME
 
 
 <a class='button is-primary prev-page' href='../01-setup/'>Setting Up</a>
+<a class='button is-primary next-page' href='../03-behavior/'>Particle Behavior</a>

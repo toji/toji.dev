@@ -4,5 +4,7 @@
       link: /webgpu-particles/
     - name: Setting Up
       link: /webgpu-particles/01-setup/
-    - name: Particle Movement
-      link: /webgpu-particles/02-movement/
+    - name: Particle Lifetime
+      link: /webgpu-particles/02-lifetime/
+    - name: Particle Behavior
+      link: /webgpu-particles/03-behavior/
