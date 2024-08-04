@@ -11,24 +11,26 @@ comments: true
 <link rel="stylesheet" href="../particles.css">
 <script src='../embedded-demos.js'></script>
 
-Now that we have some of the basic infrastructure in place to setup and display a buffer full of particles. But particles that just sit there aren't much fun! We want them to move!
+After the last section we have the ability to do simplistic rendering of a buffer full of particles, as well as move them through a simple, cycilic motion. Our code has a lot of limitations, though.  For example, our particles only reset when they reach a hard-coded boundary. That may be OK for some types of effects like rain but often you want particles to live for a specific amount of time before extinguishing (Think smoke or sparks). Additionally, with our current code we're always rendering every particle every frame, which isn't very flexible. We'd like to have a system where we can emit particles whenever we want, up to some maximum.
 
-## Putting it in motion
-To get the particles moving, we'll introduce a new compute function to our program: `particleUpdate()`.
-
-Like `particleInit()` this will also be dispatched for every particle in the buffer, but instead of being called once at startup it'll be called every frame. That will allow us to animate the particles by tweaking their position (or any other particle attributes) over time.
-
-To keep things simple initially let's try an effect that resembles rain or snow: The particles will move downward until they reach the bottom of our grid box, then reappear at the top again.
-
-FIXME
-
-<a class='demo-link' href='https://toji.github.io/webgpu-particles/3.html'>
-  <img src='02-01.png' />
-</a>
+In this section we'll investigate how to better control our particle lifetime to enable a wider range of behavior.
 
 ## Controlling particle lifetime
 
-FIXME
+At it's most basic, giving particles a fixed lifetime is simply a matter of adding one more variable to our shader struct:
+
+```rs
+struct Particle {
+  position: vec3f,
+  lifetime: f32, // New!
+  velocity: vec3f,
+  color: vec4f,
+}
+```
+
+`lifetime` is a scalar value that indicates how much longer the particle has before it resets. It will count down each frame, and reset the particle once it is less than or equal to zero.
+
+We're inserting it after `position` because WGSL alignment rules dictate that there would have been a 4-byte gap between `position` and `velocity` anyway, by virtue of being `vec3f`s. That means that adding a new `f32` value after the `vec3f` doesn't change the struct size! (Similarly, would could add it after `velocity` and get the same behavior.) If we added lifetime after `color` or before `position` the struct size would have changed, and each particle would take an extra 16 bytes of memory. As mentioned earlier, check out the [WebGPU Fundamentals' Offset Computer](https://webgpufundamentals.org/webgpu/lessons/resources/wgsl-offset-computer.html) to visualize these types of packing and alignment behaviors.
 
 <a class='demo-link' href='https://toji.github.io/webgpu-particles/4.html'>
   <img src='02-02.png' />

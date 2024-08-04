@@ -7,7 +7,7 @@ window.addEventListener('load', () => {
 
   const isLocalhost = window.location.hostname === 'localhost';
 
-  const localSampleHostname = 'http://localhost:8080/personal'
+  const localSampleHostname = 'http://localhost:8080/'
 
   const autoplayCheckbox = document.createElement('input');
   autoplayCheckbox.type = 'checkbox';

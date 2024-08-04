@@ -367,5 +367,20 @@ FIXME
 
 It's worth noting that some particle effect may not want this billboarded appearance! For example, you can imagine a system where the particles were leaves falling from a tree: allowing the particles to render as flat quads that rotated and flutter as they fall could be exactly what you want! Also, the particles don't _have_ to be quads, they could be full meshes and the instancing would work exactly the same. We're just rendering them as quads here for simplicity.
 
+## Putting it in motion
+Now we have some of the basic infrastructure in place to setup and display a buffer full of particles. But particles that just sit there aren't much fun! We want them to move!
+
+To get the particles moving, we'll introduce a new compute function to our program: `particleUpdate()`.
+
+Like `particleInit()` this will also be dispatched for every particle in the buffer, but instead of being called once at startup it'll be called every frame. That will allow us to animate the particles by tweaking their position (or any other particle attributes) over time.
+
+To keep things simple initially let's try an effect that resembles rain or snow: The particles will move downward until they reach the bottom of our grid box, then reappear at the top again.
+
+FIXME
+
+<a class='demo-link' href='https://toji.github.io/webgpu-particles/3.html'>
+  <img src='01-03.png' />
+</a>
+
 <a class='button is-primary prev-page' href='../'>Introduction</a>
 <a class='button is-primary next-page' href='../02-movement/'>Particle Movement</a>

@@ -19,12 +19,16 @@ So next lets take a look at ways that we can configure how our particle system w
 
 FIXME
 
+<a class='demo-link' href='https://toji.github.io/webgpu-particles/8.html'>
+  <img src='03-01.png' />
+</a>
+
 ## Bezier Curves
 
 FIXME
 
-<a class='demo-link' href='https://toji.github.io/webgpu-particles/8.html'>
-  <img src='03-01.png' />
+<a class='demo-link' href='https://toji.github.io/webgpu-particles/9.html'>
+  <img src='03-02.png' />
 </a>
 
 <a class='button is-primary prev-page' href='../02-lifetime/'>Particle Lifetime</a>
