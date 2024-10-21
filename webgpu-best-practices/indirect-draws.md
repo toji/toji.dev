@@ -56,7 +56,7 @@ On devices that use our Vulkan backend, like Android, Chrome is able to rely on 
 
 On devices using our Metal backend we opted to use ["vertex pulling"](https://www.yosoygames.com.ar/wp/2018/03/vertex-formats-part-2-fetch-vs-pull/) for all of our vertex attributes, and thus can do a bounds check at the time the vertex data is fetched.
 
-On our D3D12 backend, however, we had the need to do some manual validation of the index count _and_ do some data copies for each indirect draw in order to ensure that the WGSL shaders receive correct values for the [`vertex_index`](https://gpuweb.github.io/gpuweb/wgsl/#vertex-index-builtin-value) and [`instance_index`](https://gpuweb.github.io/gpuweb/wgsl/#instance-index-builtin-value) builtins. To handle these operations efficently we inject compute dispatches that perform the necessary validations and copies at the beginning of render passes which make use of indirect draw calls.
+On our D3D12 backend, however, we had the need to do some manual validation of the index count _and_ do some data copies for each indirect draw in order to ensure that the WGSL shaders receive correct values for the [`vertex_index`](https://gpuweb.github.io/gpuweb/wgsl/#vertex-index-builtin-value) and [`instance_index`](https://gpuweb.github.io/gpuweb/wgsl/#instance-index-builtin-value) builtins. To handle these operations efficiently we inject compute dispatches that perform the necessary validations and copies at the beginning of render passes which make use of indirect draw calls.
 
 As an optimization we try to batch these validations into as few dispatches as possible. The criteria for whether or not a particular indirect draw can be batched comes down to three things:
 
@@ -66,7 +66,7 @@ As an optimization we try to batch these validations into as few dispatches as p
 
 Those first two criteria are pretty basic and won't result in a lot of separate dispatches, so you really shouldn't need to give them much thought. The third criteria is critical, though!
 
-If each indirect draw call you performed was stored in a separate buffer then there's no efficient way for us to validate them all in a single dispatch. Instead we need to kick off one compute dispatch _per indirect buffer_. If you have 100 indirect draw calls in your render pass, stored in 100 separate buffers, then that means your render pass is going to start with 100 "invislbe" compute dispatches before any rendering is done.
+If each indirect draw call you performed was stored in a separate buffer then there's no efficient way for us to validate them all in a single dispatch. Instead we need to kick off one compute dispatch _per indirect buffer_. If you have 100 indirect draw calls in your render pass, stored in 100 separate buffers, then that means your render pass is going to start with 100 "invisible" compute dispatches before any rendering is done.
 
 Worse, because these dispatches are not part of the actual native rendering pass the time they take to run isn't included in any timestamp queries you perform on the pass. As such, it's easy to look at just the pass timings and think "this is performing well!" when in reality you have a fairly large amount of hidden overhead.
 

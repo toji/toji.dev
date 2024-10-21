@@ -9,7 +9,7 @@ comments: true
 
 One of the challenges of working with any graphics API is that under the hood they tend to be very asynchronous in nature. The work you send to the GPU isn't completed the moment you call draw or dispatch, but instead is queued up to happen in the near future, once previously scheduled work is complete and the resources your work needs have been flagged as ready. And once your work is done there's even more synchronization that needs to happen before the results can be observed by your application. It's a lot to keep track of, though fortunately WebGPU does most of the heavy lifting for you when it comes to keeping things in sync.
 
-This all happens in a different thread or even different process than the one that's running your JavaScript. That's great for performance, but one unfortunate side effect is that it's extremely difficult for browsers to clearly link any errors that may occur while performing GPU work to the JavaScript calls that ultimately caused those errors. Unlike typical exceptions, you won't be able to pause execution on the offending function and get a nice callstack and inspect variable state at your lesiure. Instead you'll usually get an error message that shows up in the console that has no associated line number.
+This all happens in a different thread or even different process than the one that's running your JavaScript. That's great for performance, but one unfortunate side effect is that it's extremely difficult for browsers to clearly link any errors that may occur while performing GPU work to the JavaScript calls that ultimately caused those errors. Unlike typical exceptions, you won't be able to pause execution on the offending function and get a nice callstack and inspect variable state at your leisure. Instead you'll usually get an error message that shows up in the console that has no associated line number.
 
 Given the complex nature of GPU APIs, errors are _going_ to happen during development, so how do you handle them effectively in an environment like that?
 
@@ -17,7 +17,7 @@ Given the complex nature of GPU APIs, errors are _going_ to happen during develo
 
 If you are familiar with WebGL or OpenGL, you may recall that it's error handling abilities... left something to be desired.
 
-The short version was that at any point during you application you would call `gl.getError()`, which would ask the driver if any errors had occured, giving you back one of a handful of vauge codes that represented the first error that happened since the last time someone called `gl.getError()`. If you wanted any control over which set of commands the error check covered you had to pepper your code with `gl.getError()` everywhere, which was an easy way to destroy your app's performance. This is made even worse when using WebGL in a browser using a multi-process architecture such as Chrome, Edge, or Firefox, since the `gl.getError()` call is synchronous, and thus forces one process to stop and wait for another to catch up. The same thing may happen in the driver if it's multithreaded internally.
+The short version was that at any point during you application you would call `gl.getError()`, which would ask the driver if any errors had occurred, giving you back one of a handful of vague codes that represented the first error that happened since the last time someone called `gl.getError()`. If you wanted any control over which set of commands the error check covered you had to pepper your code with `gl.getError()` everywhere, which was an easy way to destroy your app's performance. This is made even worse when using WebGL in a browser using a multi-process architecture such as Chrome, Edge, or Firefox, since the `gl.getError()` call is synchronous, and thus forces one process to stop and wait for another to catch up. The same thing may happen in the driver if it's multithreaded internally.
 
 ![Nothing about this was fine.](./media/gl-get-error.png)
 (With apologies to [KC Green](https://topatoco.com/collections/this-is-fine))
@@ -30,7 +30,7 @@ The first thing to know is that if your application does no explicit error handl
 
 ## Error Scopes
 
-In WebGPU the primary way for your application to intercept and respond to errors is through a mechanism called Error Scopes. Error Scopes are pushed onto a stack on the `GPUDevice` with a class of error that they capture (`validation`, `out-of-memory`, or `internal`). When popped they return a promise which resolves with the first error of that class (if any) that occured while that scope was on the top of the stack.
+In WebGPU the primary way for your application to intercept and respond to errors is through a mechanism called Error Scopes. Error Scopes are pushed onto a stack on the `GPUDevice` with a class of error that they capture (`validation`, `out-of-memory`, or `internal`). When popped they return a promise which resolves with the first error of that class (if any) that occurred while that scope was on the top of the stack.
 
 ```js
 // This example is pulled directly from the spec.
@@ -44,14 +44,14 @@ device.popErrorScope().then((error) => {
     if (error) {
         // There was an error creating the sampler, so discard it.
         sampler = null;
-        console.error(`An error occured while creating sampler: ${error.message}`);
+        console.error(`An error occurred while creating sampler: ${error.message}`);
     }
 });
 ```
 
-The fact that the error scopes resolve asynchorously is important, as it allows the errors to be detected and reported without causing pipeline stalls on the GPU.
+The fact that the error scopes resolve asynchronously is important, as it allows the errors to be detected and reported without causing pipeline stalls on the GPU.
 
-If you capture an error in an error scope then the associated human-readable message that normally would show up in the console in suppressed and instead given as the `message` attribute of the resolved error. There's no specific formatting rules around how these messages are formatted, and each implementation will do it a little differently. As a result, you **should not** attempt to parse them and react to the message contents programatically!
+If you capture an error in an error scope then the associated human-readable message that normally would show up in the console in suppressed and instead given as the `message` attribute of the resolved error. There's no specific formatting rules around how these messages are formatted, and each implementation will do it a little differently. As a result, you **should not** attempt to parse them and react to the message contents programmatically!
 
 ### Reacting to errors
 
@@ -126,7 +126,7 @@ device.popErrorScope().then((error) => {
 });
 ```
 
-This works much better because the application can take a targeted action based on which error was raised and what was happening at the time. If a mesh fails to load then that single mesh can be replaced (perhaps with something like a model of large red 'ERROR' text?) rather than shutting down the entire program. If a shader is too complicated for the current device, a simpler one can be substitued in it's place.
+This works much better because the application can take a targeted action based on which error was raised and what was happening at the time. If a mesh fails to load then that single mesh can be replaced (perhaps with something like a model of large red 'ERROR' text?) rather than shutting down the entire program. If a shader is too complicated for the current device, a simpler one can be substituted in it's place.
 
 The `out-of-memory` error scope still encompasses the entire load here, even though we could have made it more targeted too. But by isolating it's response from the other types of errors we can communicate more clearly to the user what's going on and give targeted instructions rather than simply failing.
 
@@ -170,7 +170,7 @@ async loadMesh(mesh) {
 }
 ```
 
-Because now the code is going to push one error scope onto the stack for every mesh before it's able to pop any of them. It would mean that when the code moves on to the pipeline creation loop the final validation error scope would still be active, and any validation errors that occured while creating the pipelines would then be attributed to one of these error scopes intended for observing mesh loading. Additionally, the error scopes will be popped effectively at random depending on when the `fetch`es resolve. Depending on exactly how you are using error scopes elsewhere in the application, that can cause chaos.
+Because now the code is going to push one error scope onto the stack for every mesh before it's able to pop any of them. It would mean that when the code moves on to the pipeline creation loop the final validation error scope would still be active, and any validation errors that occurred while creating the pipelines would then be attributed to one of these error scopes intended for observing mesh loading. Additionally, the error scopes will be popped effectively at random depending on when the `fetch`es resolve. Depending on exactly how you are using error scopes elsewhere in the application, that can cause chaos.
 
 Instead, the best pattern is to only use error scopes to enclose synchronous sections of code. In our example function, that would mean doing this instead:
 
@@ -213,7 +213,7 @@ One big exception to all of the above is shaders. Given that WGSL is a separate 
 
 To start, just like with other WebGPU errors, if you don't do anything then any messages generated at WGSL compile time will be displayed in the browser's developer console, and that should be sufficient for most basic debugging needs.
 
-However, what if you were building a web application that supported soemthing like live shader editing? (See [ShaderToy](https://shadertoy.com) as an excellent WebGL-based example.) In that case it would be extremely useful to get very detailed messages from the browser about shader errors, warnings, and other messages along with contextual information such as what line in the shader provoked the message. That way you could surface them in the application UI itself rather than requiring users to keep the developer console open all the time.
+However, what if you were building a web application that supported something like live shader editing? (See [ShaderToy](https://shadertoy.com) as an excellent WebGL-based example.) In that case it would be extremely useful to get very detailed messages from the browser about shader errors, warnings, and other messages along with contextual information such as what line in the shader provoked the message. That way you could surface them in the application UI itself rather than requiring users to keep the developer console open all the time.
 
 Fortunately, that's exactly what `shaderModule.getCompilationInfo()` provides you!
 
@@ -366,7 +366,7 @@ Because the message now includes _which_ buffer was lacking the correct usage it
 
 ## Debug Groups
 
-In some cases even labeling every object may not give you the context you need. In order to help you identify what part of your code a particular error message was generated by, WebGPU also gives you the ability to set Debug Groups. A Debug Group works somewhat like an Error Scope, in that you push and pop them onto a stack, but their sole purpose is to be included in error messages to give you a better sense of where the problem occured. For example:
+In some cases even labeling every object may not give you the context you need. In order to help you identify what part of your code a particular error message was generated by, WebGPU also gives you the ability to set Debug Groups. A Debug Group works somewhat like an Error Scope, in that you push and pop them onto a stack, but their sole purpose is to be included in error messages to give you a better sense of where the problem occurred. For example:
 
 ```js
 const commandEncoder = device.createCommandEncoder();

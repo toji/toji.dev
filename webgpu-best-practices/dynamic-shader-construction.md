@@ -253,7 +253,7 @@ const computePipeline = device.createComputePipeline({
 });
 ```
 
-Ultimately all of these uses can also be achived with template literals. The benefit that the overriable constants have is that they can be applied without recreating the shader module, which can improve performance when creating a large variety of pipeline variants.
+Ultimately all of these uses can also be achieved with template literals. The benefit that the overriable constants have is that they can be applied without recreating the shader module, which can improve performance when creating a large variety of pipeline variants.
 
 ## Use JavaScript modules string interpolation to reuse shader fragments
 
@@ -346,7 +346,7 @@ gl.compileShader(basicAlphaFragment);
 
 It's a little awkward to read, but it gets the job done and allows for more complex "ubershaders" to be adjusted situationally, often to account for things like missing vertex attributes or taking a cheaper path on mobile devices, etc.
 
-Unfortunately for us, JavaScript doesn't offer the same type of easy replacement for this behavior as it does for using defines as contants. The obvious patterns all tend to make the code harder to read:
+Unfortunately for us, JavaScript doesn't offer the same type of easy replacement for this behavior as it does for using defines as constants. The obvious patterns all tend to make the code harder to read:
 
 ```js
 // basic_fragment.js
@@ -426,7 +426,7 @@ export const greenFragmentSrc = /*wgsl*/`
 
 ## Have fun, and make cool stuff!
 
-This was a shorter doc, but only because JavaScript already offers so many powerful ways to work with strings out of the box. It makes it easy to build out complex WGSL shader libraries without relying on features of the WGSL language to accomodate it. These patterns are really easy to make use of in your own application, and it usually takes just a little nudge to be able to make the leap from a more `#define`-heavy GLSL approach.
+This was a shorter doc, but only because JavaScript already offers so many powerful ways to work with strings out of the box. It makes it easy to build out complex WGSL shader libraries without relying on features of the WGSL language to accommodate it. These patterns are really easy to make use of in your own application, and it usually takes just a little nudge to be able to make the leap from a more `#define`-heavy GLSL approach.
 
 And it's worth mentioning that **all of the above techniques ALSO apply to building GLSL shaders too**! That should make the transition easier when building apps that have both a WebGL and WebGPU rendering path.
 

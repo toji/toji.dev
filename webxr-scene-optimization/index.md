@@ -26,7 +26,7 @@ So, you find a model that you think would work great for what you have in mind. 
 
 So you fire that up on a desktop and it probably works well! Maybe you have a PC VR headset and give that a try and it's working well too! Hooray!
 
-Then you try it on your target device. (I'm gonna use an Oculus Go just to really hammer the point home. It's a good device with nice WebXR support built in but a realtively weak processor.) And you notice that it's taking a long time to load, even on your local network. And when it finally does load, you click the VR button and...
+Then you try it on your target device. (I'm gonna use an Oculus Go just to really hammer the point home. It's a good device with nice WebXR support built in but a relatively weak processor.) And you notice that it's taking a long time to load, even on your local network. And when it finally does load, you click the VR button and...
 
 ![Oh No.](./media/bad-vr.gif)
 
@@ -155,7 +155,7 @@ I can do this in Blender's `Object Mode` by selecting all the rocks (`Shift+Clic
 
 ![Deletin' the rocks](./media/delete-rocks.png)
 
-I also deleted a few other items as well as I spin around the island, mostly very small meshes in out of the way places where I don't thing the player will ever notice even if they technically can see it. So that takes care of the obvious meshes I can get rid of without hurting the asthetic. Let's see how we did!
+I also deleted a few other items as well as I spin around the island, mostly very small meshes in out of the way places where I don't thing the player will ever notice even if they technically can see it. So that takes care of the obvious meshes I can get rid of without hurting the aesthetic. Let's see how we did!
 
 ```
 Mesh Count:  638 -> 614
@@ -165,11 +165,11 @@ Hrm... not a terribly impressive reduction. But fear not! We have a much more po
 
 ## Merging by Material
 
-If you look around the island, you'll see that there's a LOT of objects that share the same material (texture/color/shinyness/etc.) Let's look at the towers of the castle for example.
+If you look around the island, you'll see that there's a LOT of objects that share the same material (texture/color/shininess/etc.) Let's look at the towers of the castle for example.
 
 ![Such a pretty little tower](./media/tower-selected.png)
 
-You'll notice in the right hand pane I've got the `materials` tab open and it shows that this tower is using the descriptively names "Material.007". Furthermore, next to it is a number that shows how many other meshes in the scene are using the same material. 116! If we click around the scene to see other objects with the same material we'll find it's used on the castle walls, bridges, houses, even the sheep! It's pretty common for artists to reuse their materials multipled times throughout a scene simply because it's often easier on them to do it that way.
+You'll notice in the right hand pane I've got the `materials` tab open and it shows that this tower is using the descriptively names "Material.007". Furthermore, next to it is a number that shows how many other meshes in the scene are using the same material. 116! If we click around the scene to see other objects with the same material we'll find it's used on the castle walls, bridges, houses, even the sheep! It's pretty common for artists to reuse their materials multiple times throughout a scene simply because it's often easier on them to do it that way.
 
 When materials do get reused across multiple meshes, we can apply a really easy trick: Merging most/all of the meshes using a that material into one big mesh!
 
@@ -207,7 +207,7 @@ That was such a huge boost in the performance of our scene, you may wonder why y
 
 First and foremost is if you're still editing the scene. Merged meshes are great for rendering but a major pain for mesh placement. For example, if, after merging, we try to move just one of the rocks on the island we'll find that almost every other rock on the island now wants to move at the same time. We can still move single features if we're willing to go into `Edit Mode` and select all the faces individually (a time consuming task), but it's much easier to change the layout when everything is still separate. As such the mesh merging should usually be done as a last step, and it's a good idea to keep an un-merged copy of the asset around in case you need to edit it later.
 
-For mostly the same reasons, if you have individual meshes that you want to move around at runtime, you should leave them separate as well. For instance: There's various birds around the island, and if I wanted to have them fly around on some preset path it's easiest to leave them separate so I can either keyframe the animation in Blender or do it programatically in my page script.
+For mostly the same reasons, if you have individual meshes that you want to move around at runtime, you should leave them separate as well. For instance: There's various birds around the island, and if I wanted to have them fly around on some preset path it's easiest to leave them separate so I can either keyframe the animation in Blender or do it programmatically in my page script.
 
 I also found that in the process of doing the merge I accidentally stomped on the meshes that I was using in the unoptimized version for teleportation. (The `floorMeshes` that you pass to Babylon's `createDefaultXRExperience` method.) This turned out to be a happy accident, though, as it forced me to pick out only the individual triangles I wanted to be able to "walk" on in the mesh (done in `Edit Mode`) and split them out into a separate mesh (`Mesh` menu -> `Separate` -> `Selection`).
 
@@ -223,11 +223,11 @@ A common way of reducing the number of materials used is to use Texture Atlases,
 
 ![Simple atlas](./media/stoneWallCircle_baseColor.png)
 
-Then, in Blender, I changed the material for one of the mesheses to use the atlas texture, and assigned that material to the other mesh as well. Then the final step is to adjust the texture coordinates for each set of meshes to cover only their portion of the atlas. This is done in the `UV Editor` view with the model faces you want to edit selected in `Edit Mode`. You can see me adjusting the coordinates here:
+Then, in Blender, I changed the material for one of the meshes to use the atlas texture, and assigned that material to the other mesh as well. Then the final step is to adjust the texture coordinates for each set of meshes to cover only their portion of the atlas. This is done in the `UV Editor` view with the model faces you want to edit selected in `Edit Mode`. You can see me adjusting the coordinates here:
 
 ![Simple atlas](./media/atlas-prep.gif)
 
-And of course, once the meshes are sharing a material they're good candiates for merging!
+And of course, once the meshes are sharing a material they're good candidates for merging!
 
 Also, while on my merge-a-palooza I also noticed that there were a couple of textures that shipped with the model that happened to be identical. Browsing through the materials in Blender, I found that they were being used in effectively identical materials applied to different meshes. For example: The little Golem on one end of the island shared an identical material with some tree stumps, but both materials were using a different copy of the same texture. Because of this I was able to set both sets of meshes to use a single material, which then let me merge them as well.
 
@@ -245,7 +245,7 @@ Something that won't help with reducing the number of draw calls but CAN speed u
 
 There's a few situations where it shouldn't apply, though, and some cases where you may have to fix something before it can be used. In every case you should visually inspect objects as you turn backface culling on to make sure you're getting the desired effect. Ideally as you toggle the checkbox off and on you shouldn't see your mesh change, and if it does you'll either need to fix the mesh or leave backface culling off.
 
-To start, you rarely want to use backface culling when your object has any transparency but it also depends on the effect you want. Also, if you have any geometry that consists of just a single "sheet" of polygons turning on backface culling will make them disappear when viewed from one side. This is an issue, for example, on the little smoke wisps that are coming out of some of the chiminey's on the island.
+To start, you rarely want to use backface culling when your object has any transparency but it also depends on the effect you want. Also, if you have any geometry that consists of just a single "sheet" of polygons turning on backface culling will make them disappear when viewed from one side. This is an issue, for example, on the little smoke wisps that are coming out of some of the chimneys on the island.
 
 ![Smoke with no backface culling](./media/smoke-no-culling.png)
 
@@ -307,13 +307,13 @@ The easiest thing to look for are any images that seem too big for their intende
 
 That image is 512x512 px, and it just really doesn't need to be. We can easily scale it down to a quarter that size (256x256) and not lose anything important.
 
-It's also worth checking to see if saving any particular image as a JPEG vs. PNG yields better file sizes. PNGs can be smaller for large areas of flat colors (like above), while JPEGs tend to be smaller (but lossy) for more detailed images. Of course if you need transparecy then you should always keep the image as a PNG.
+It's also worth checking to see if saving any particular image as a JPEG vs. PNG yields better file sizes. PNGs can be smaller for large areas of flat colors (like above), while JPEGs tend to be smaller (but lossy) for more detailed images. Of course if you need transparency then you should always keep the image as a PNG.
 
 (**TODO:** Need a section about making use of BASIS compressed images here.)
 
 # End Results
 
-And that wraps up this walthrough! Let's take a look at the numbers at the end of the day:
+And that wraps up this walkthrough! Let's take a look at the numbers at the end of the day:
 
 ```
 Materials: 49 -> 34
@@ -326,7 +326,7 @@ Frame JS time: ~44ms -> ~13ms (Oculus Go)
 
 Not bad! Not bad at all!
 
-You can [**see the live version of the optimized page here**](https://toji.github.io/webxr-scene-optimization/optimized/) and compare to the [unoptmized version](https://toji.github.io/webxr-scene-optimization/original/) we linked at the beginning of this guide to see exactly how much of a difference we've made.
+You can [**see the live version of the optimized page here**](https://toji.github.io/webxr-scene-optimization/optimized/) and compare to the [unoptimized version](https://toji.github.io/webxr-scene-optimization/original/) we linked at the beginning of this guide to see exactly how much of a difference we've made.
 
 Thanks for reading, and good luck with your own projects!
 

@@ -23,7 +23,7 @@ Throughout the doc, images are linked to live samples that run in the browser. T
 
 It's built to run on top of the latest native APIs such as Vulkan, Metal, and Direct3D 12, and as a result it uses many of the same patterns for interacting with the GPU that those APIs established.
 
-For developers that are familar with other GPU APIs, such as WebGL, or are using data that was built with other APIs in mind, adjusting to using these new patterns effectively can be challenging at first.
+For developers that are familiar with other GPU APIs, such as WebGL, or are using data that was built with other APIs in mind, adjusting to using these new patterns effectively can be challenging at first.
 
 This document walks through one such common and potentially difficult scenario: rendering [glTF 2.0 models](https://www.khronos.org/gltf/). Given that the design of glTF was heavily influenced by the WebGL/OpenGL ES APIs, it offers a good case-study for ways to approach these types of problems in WebGPU that will hopefully be applicable to situations that extend well beyond use of the format itself.
 
@@ -43,7 +43,7 @@ Despite the fact that we'll be covering ways of rendering glTF models with WebGP
 
 Instead we'll be focusing on how the data contained in the glTF files maps to various WebGPU concepts, why some of those mappings can initially lead to inefficient use of WebGPU, and strategies for improving it.
 
-Ideally you'd want to read through this document after you've _at least_ done a few WebGPU "Hello world" excercises where you've been able to get triangles on the screen, and it would be helpful if you take some time to look over the [glTF 2.0 reference guide](https://www.khronos.org/files/gltf20-reference-guide.pdf) if you're not already familiar with the file format.
+Ideally you'd want to read through this document after you've _at least_ done a few WebGPU "Hello world" exercises where you've been able to get triangles on the screen, and it would be helpful if you take some time to look over the [glTF 2.0 reference guide](https://www.khronos.org/files/gltf20-reference-guide.pdf) if you're not already familiar with the file format.
 
 If you're looking for a walkthrough of the basics of loading and display a glTF model with WebGPU, Will Usher has put together an excellent series of blog posts titled ["From 0 to glTF with WebGPU"](https://www.willusher.io/graphics/2023/04/10/0-to-gltf-triangle) on exactly that subject. They focus on getting geometry on screen and not necessarily the most efficient way to do that, though, which makes them a great companion piece to this article.
 
@@ -56,15 +56,15 @@ Some other great resources to start with if you haven't done any WebGPU developm
  - The [WebGPU](https://gpuweb.github.io/gpuweb/) and [WGSL](https://gpuweb.github.io/gpuweb/wgsl/) specs - Dense and not fun to read, but a good reference
 
 ### WebGPU Compatibility
-At the time of the latest update to this article WebGPU has shipped in Chromium-based browsers (Google Chrome, Microsoft Edge, etc) on Mac or Windows, and the samples accompanying this page have been confirmed to work on them. It is expected that they'll eventually run on any browser that implements WebGPU on all OSes, it simply takes time for a large feature like this to propegate through the web ecosystem.
+At the time of the latest update to this article WebGPU has shipped in Chromium-based browsers (Google Chrome, Microsoft Edge, etc) on Mac or Windows, and the samples accompanying this page have been confirmed to work on them. It is expected that they'll eventually run on any browser that implements WebGPU on all OSes, it simply takes time for a large feature like this to propagate through the web ecosystem.
 
 ## Part 1: A Naive Renderer
 
-Let's start by looking at what it takes to do the most straighforward "get triangles on the screen" renderer we can for a glTF model.
+Let's start by looking at what it takes to do the most straightforward "get triangles on the screen" renderer we can for a glTF model.
 
 ### A brief primer on glTF meshes
 
-glTF is a popular format for delivering and loading runtime 3D assets, especially because it was designed to work well with web-friendly concepts like [JSON](https://www.json.org/json-en.html) and [ArrayBuffers](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer). As mentioned earlier, it was also designed with an eye towards being easy to display with WebGL (or OpenGL ES). It uses enum values from that API to encode certain pieces of state, and formats it's data in such a way that it's easy to pass directly to the associated WebGL methods. It's absolutely possible to load glTF assets and display them efficiently with WebGPU (or any othe GPU API for that matter), but this slight bias towards the older API means that the data in the file sometimes needs to be transformed to satisfy WebGPUs expected structure.
+glTF is a popular format for delivering and loading runtime 3D assets, especially because it was designed to work well with web-friendly concepts like [JSON](https://www.json.org/json-en.html) and [ArrayBuffers](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer). As mentioned earlier, it was also designed with an eye towards being easy to display with WebGL (or OpenGL ES). It uses enum values from that API to encode certain pieces of state, and formats it's data in such a way that it's easy to pass directly to the associated WebGL methods. It's absolutely possible to load glTF assets and display them efficiently with WebGPU (or any other GPU API for that matter), but this slight bias towards the older API means that the data in the file sometimes needs to be transformed to satisfy WebGPUs expected structure.
 
 A perfect example of this is how glTF encodes vertex buffer data. glTF files define `meshes` which each contain a list of chunks of renderable geometry called (confusingly) `primitives`. A `primitive` is represented as a list of named `attributes`, and a `mode` (triangles, lines, or points). Primitives also reference a `material` and possibly `indices`, but let's ignore those for the moment to make things simpler.
 
@@ -487,7 +487,7 @@ And that will get geometry on the screen! It's not a terrible place to start whe
 
 If you want to see the above approach in action, I've put together a sample page that does exactly that. It hides most of the boilerplate of initializing WebGPU, loading the glTF files, etc. and just focuses on the above methods, but you can see that using it we can load and render a variety of models from the [Khronos glTF samples repository](https://github.com/KhronosGroup/glTF-Sample-Models) as simple untextured geometry. Even "larger" scenes like Sponza work!
 
-[![Sample 1 sceenshot](./media/sample-01.jpg)
+[![Sample 1 screenshot](./media/sample-01.jpg)
 Click to launch **Sample 01 - Naive Rendering**](https://toji.github.io/webgpu-gltf-case-study/01-naive-renderer.html)
 
 So... triangles on screen! Victory! Slap some materials on there and call it a day, right?
@@ -661,7 +661,7 @@ This is referred to as "interleaved" vertex data, and just like with the previou
 
 To take advantage of files with this kind of layout and reduce the number of times we need to call `setVertexBuffer()`, we can sort the attributes by the `bufferView` they use as we build the buffer layout.
 
-One thing that we need to be careful of is that if we run into the situation from the previous step, where attributes share a buffer but aren't actually interleaved, we still need to treat those as separate buffers. It adds some complexity, but it's managable:
+One thing that we need to be careful of is that if we run into the situation from the previous step, where attributes share a buffer but aren't actually interleaved, we still need to treat those as separate buffers. It adds some complexity, but it's manageable:
 
 ```js
 function setupPrimitive(gltf, primitive) {
@@ -743,7 +743,7 @@ And fortunately for us, this change doesn't require any alterations to the rende
 
 You can see the combined changes from these two steps at work on the second sample page, which now loads every model in the list correctly.
 
-[![Sample 2 sceenshot](./media/sample-02.jpg)
+[![Sample 2 screenshot](./media/sample-02.jpg)
 Click to launch **Sample 02 - Buffer Layouts**](https://toji.github.io/webgpu-gltf-case-study/02-buffer-layouts.html)
 
 ### More work at load == faster drawing
@@ -752,7 +752,7 @@ With the above changes we're starting to touch on a pattern of the setup code ge
 
 <details markdown=block>
   <summary markdown=span><b>Extreme vertex layout normalization</b></summary>
-  If we want to take the ethos of "more work at load time, less work at render time" to the extreme, one option you could always turn to is to actually normalize all vertex buffers into a pre-determined layout at load time. For example, you could say that your layout should _always_ consist of an interleaved `POSITION`, `TEXCOORD_0`, `NORMAL`, and `TANGENT`. If you load any data that doesn't fit that layout, you'd copy it into a new buffer (either in JavaScript or, preferrably, in a compute shader) in the layout you'd prefer and render with that instead. Similarly If the model you load doesn't have one of those attributes, you'd generate it.
+  If we want to take the ethos of "more work at load time, less work at render time" to the extreme, one option you could always turn to is to actually normalize all vertex buffers into a pre-determined layout at load time. For example, you could say that your layout should _always_ consist of an interleaved `POSITION`, `TEXCOORD_0`, `NORMAL`, and `TANGENT`. If you load any data that doesn't fit that layout, you'd copy it into a new buffer (either in JavaScript or, preferably, in a compute shader) in the layout you'd prefer and render with that instead. Similarly If the model you load doesn't have one of those attributes, you'd generate it.
 
   This is definitely overkill for any situation where you're just rendering one model, but it may actually be practical if you want to display large scenes that mix many meshes from multiple files. Of course, a **far better** solution would be to pre-process your models in advance to ensure they all match your desired layout anyway, but that's not always an option.
 
@@ -870,7 +870,7 @@ Next up are values that are dependent on the **vertex data layout** of your geom
 
 Finally, the remainder of the values are likely to come from your **material**. It's common that a renderer may support multiple different types of materials which require entirely different shaders to achieve. For example, a Physically Based Rendering (PBR) surface vs. one that is unaffected by lighting ("fullbright" or "unlit"). But within groups of the same type of material only a few flags should affect the pipeline definition. A material being double sided will determine the cull mode, for example, and materials that are partially transparent will affect the blend modes of the color targets, as well as maybe alpha-to-coverage settings. Generally these should be pretty minimal, though, and the majority of your material information should be captured as texture or buffer data and supplied by a bind group.
 
-It's worth mentioning that the code of the vertex and fragment shader modules sit in a strange place where they can be influenced by all three of those aspects, which can make it seem like another vector for increasing the number of pipelines in use, but you can get away with suprisingly few variants of your shader code itself by relying more on supplying defaults in bind groups and making use of branching and looping in shaders. Again, we'll talk about this more below.
+It's worth mentioning that the code of the vertex and fragment shader modules sit in a strange place where they can be influenced by all three of those aspects, which can make it seem like another vector for increasing the number of pipelines in use, but you can get away with surprisingly few variants of your shader code itself by relying more on supplying defaults in bind groups and making use of branching and looping in shaders. Again, we'll talk about this more below.
 
 ### Identifying duplicate pipelines
 
@@ -985,7 +985,7 @@ const bufferLayout2 = [{
 If you look carefully you can see that these in fact represent the same buffer layout! Our simple de-duping system from the previous code sample won't recognize that, though, because of a few differences:
 
  - Even though the same buffer layouts are used, the order is different.
- - Similarly, the postion and normal attributes are declared in a different order in the second layout.
+ - Similarly, the position and normal attributes are declared in a different order in the second layout.
 
 Fortunately, we can still allow our code to recognize these as the same layout. This is because the order of the buffers in the pipeline descriptor _doesn't matter_ as long as at draw time we set the buffers in the corresponding slots. Similarly, the order that attributes are declared in doesn't have any effect on how the vertex data shows up in the shader as long as the `shaderLocation` stays consistent. So we can increase the number of potential shared pipelines by sorting each buffer's attributes by `shaderLocation`, then sorting the buffers by the `attributes[0].shaderLocation`.
 
@@ -1036,7 +1036,7 @@ It should be noted that the previous work that we did to normalize attribute off
 
 ### Rethinking the render loop
 
-We've now dramatically reduced the number of pipelines we're creating. If we continue using the same render loop from above, though, that doesn't help us much. We're still setting the pipeline for every primitive we draw! It's possible that the driver might recognize that we're setting same pipeline repeatedly and try to optimize it away, but WebGPU implementations have zero obligation to identify duplicate state changes for you. It will always be a far better strategy to reduce unecessary work in your own code than to hope that some other part of the stack will magically make things faster for you.
+We've now dramatically reduced the number of pipelines we're creating. If we continue using the same render loop from above, though, that doesn't help us much. We're still setting the pipeline for every primitive we draw! It's possible that the driver might recognize that we're setting same pipeline repeatedly and try to optimize it away, but WebGPU implementations have zero obligation to identify duplicate state changes for you. It will always be a far better strategy to reduce unnecessary work in your own code than to hope that some other part of the stack will magically make things faster for you.
 
 You could do something like keep track of the last pipeline used and compare it to the next one and skip the `setPipeline()` call if they're the same. This may work for the samples linked on this page but would be unpredictable in more real-world situations.
 
@@ -1104,7 +1104,7 @@ function setupMeshNode(gltf, node, primitiveInstances) {
 }
 ```
 
-Also, we were previously storing the pipeline to be used for each primitve. Instead, we should start saving a list of primitives to be rendered for every pipeline, like so:
+Also, we were previously storing the pipeline to be used for each primitive. Instead, we should start saving a list of primitives to be rendered for every pipeline, like so:
 
 ```js
 function getPipelineForPrimitive(args) {
@@ -1121,7 +1121,7 @@ function getPipelineForPrimitive(args) {
 }
 ```
 
-When it's time to set up the primitives we want to store the list of instances with the primitve's GPU data, and we want to add this primitive onto the list of primitives for the pipeline it uses.
+When it's time to set up the primitives we want to store the list of instances with the primitive's GPU data, and we want to add this primitive onto the list of primitives for the pipeline it uses.
 
 ```js
 function setupPrimitive(gltf, primitive, primitiveInstances) {
@@ -1171,7 +1171,7 @@ You can see that this isn't much less complex than the previous version. We're j
 [![Sample 3 screenshot](./media/sample-03.jpg)
 Click to launch **Sample 03 - Pipeline Caching**](https://toji.github.io/webgpu-gltf-case-study/03-pipeline-caching.html)
 
-For example, look at the stats for the "buggy" model on this page. In the prevous sample, we were calling `setPipeline()` 236 times every frame. With the changes described above we're now calling it once! And we're setting buffers less too, 444 times vs 708 in the previous sample.
+For example, look at the stats for the "buggy" model on this page. In the previous sample, we were calling `setPipeline()` 236 times every frame. With the changes described above we're now calling it once! And we're setting buffers less too, 444 times vs 708 in the previous sample.
 
 A tradeoff is that we're calling `setBindGroup()` more now (237 times vs 191 in the previous sample), so we've traded off significantly less `setPipeline()` calls for more `setBindGroup()` calls. But that's OK! `setBindGroup()` is generally a cheaper operation AND we can use some additional tricks to reduce those calls too.
 
@@ -1416,7 +1416,7 @@ instanceBuffer.unmap();
 
 So now all the matrices used by our scene are in one big buffer! But how do we tell each draw call what part of that buffer to use?
 
-You _could_ do it with bind groups. One option is creating a new bind group for each primitve and setting the `resource.offset` to the appropriate point in the buffer when defining the bind group's buffer entry. Another approach would be to create a single bind group with [dynamic offsets](https://gpuweb.github.io/gpuweb/#dom-gpubufferbindinglayout-hasdynamicoffset) for the buffer binding, which would then allow you to set the offset into the buffer when you call `setBindGroup()`.
+You _could_ do it with bind groups. One option is creating a new bind group for each primitive and setting the `resource.offset` to the appropriate point in the buffer when defining the bind group's buffer entry. Another approach would be to create a single bind group with [dynamic offsets](https://gpuweb.github.io/gpuweb/#dom-gpubufferbindinglayout-hasdynamicoffset) for the buffer binding, which would then allow you to set the offset into the buffer when you call `setBindGroup()`.
 
 Either of those approaches, though, will still require you to call `setBindGroup()` once per primitive, which isn't really an improvement on what we had before. Instead, we can use an instancing trick that allows us to only set the bind group once. First, we create a single bind group that covers the entire instance buffer.
 
@@ -1501,7 +1501,7 @@ Materials in glTF are generally comprised of four different properties: `images`
 
 ### Images
 
-There's a bit of terminology confusion here, because glTF `images` map most closely to WebGPU Textures, but otherwise it's a pretty straightforward thing to load them. Unless you're using extentions, glTF defines that all images come in the form of a JPEG or PNG file, either defined by a relative URI or encoded in one of the binary buffers. That's great news for us, because browsers happen to be really good at loading image files!
+There's a bit of terminology confusion here, because glTF `images` map most closely to WebGPU Textures, but otherwise it's a pretty straightforward thing to load them. Unless you're using extensions, glTF defines that all images come in the form of a JPEG or PNG file, either defined by a relative URI or encoded in one of the binary buffers. That's great news for us, because browsers happen to be really good at loading image files!
 
 I've written an entirely separate document about best practices for [creating WebGPU textures from image elements](https://toji.github.io/webgpu-best-practices/img-textures.html). It even has [a section _specifically about loading images from a glTF file!_](https://toji.github.io/webgpu-best-practices/img-textures.html#real-world-application-gltf) So really, just go read that. It won't take long.
 
@@ -1634,13 +1634,13 @@ Here's a relatively complete example:
 
 ## Part 5.1: Applying material properties
 
-Now that we've got a good idea of what makes up a glTF material we need to start applying those properties to our rendering. This will happen accross several parts of the code.
+Now that we've got a good idea of what makes up a glTF material we need to start applying those properties to our rendering. This will happen across several parts of the code.
 
 ### Alpha blending and culling
 
-The first part of the materials that we can incorporate is the `doubleSided` and `alphaMode` properties. These both affect values in the render pipline descriptor, and as a result different values here will result in new pipeline variants, even if the geometry layout is identical.
+The first part of the materials that we can incorporate is the `doubleSided` and `alphaMode` properties. These both affect values in the render pipeline descriptor, and as a result different values here will result in new pipeline variants, even if the geometry layout is identical.
 
-Fortunately our previous code changes have prepared us very well for this! First, we'll want to start passing the material when we generate the pipeline args so that it can be referenced during pipline creation and contribute to the pipeline key.
+Fortunately our previous code changes have prepared us very well for this! First, we'll want to start passing the material when we generate the pipeline args so that it can be referenced during pipeline creation and contribute to the pipeline key.
 
 ```js
 function getPipelineArgs(topology, buffers, material) {
@@ -1694,7 +1694,7 @@ if (args.alphaMode == "BLEND") {
 pipeline = device.createRenderPipeline({
   fragment: {
     targets: [{
-      format: cavasColorFormat,
+      format: canvasColorFormat,
       // Apply the necessary blending
       blend,
     }],
@@ -1703,7 +1703,7 @@ pipeline = device.createRenderPipeline({
 });
 ```
 
-That's the entirity of the changes we need to make to the pipelines to support these materials! The rest of the material values will be communicated either via bind groups or shader changes.
+That's the entirety of the changes we need to make to the pipelines to support these materials! The rest of the material values will be communicated either via bind groups or shader changes.
 
 <details markdown=block>
   <summary markdown=span><b>A note on transparent surface ordering</b></summary>
@@ -1711,7 +1711,7 @@ That's the entirity of the changes we need to make to the pipelines to support t
 
   Traditionally the way to handle this is to render all opaque surfaces first, then render all transparent surfaces sorted back-to-front from the camera's point of view. This still isn't perfect, though, as you could have very large transparent meshes that don't sort trivially.
 
-  There's also newer methods for [order-independent transparancy](https://en.wikipedia.org/wiki/Order-independent_transparency) that typically involve storing data about transparent surfaces in intermediate render targets and resolving them in the correct order as a post process. These can achieve good results but are more expense in terms of both rendering and memory usage and typically not favored for performance sensitive applications like games, especially on mobile GPUs.
+  There's also newer methods for [order-independent transparency](https://en.wikipedia.org/wiki/Order-independent_transparency) that typically involve storing data about transparent surfaces in intermediate render targets and resolving them in the correct order as a post process. These can achieve good results but are more expense in terms of both rendering and memory usage and typically not favored for performance sensitive applications like games, especially on mobile GPUs.
 
   This document's approach to correct transparency rendering is to stick its fingers in its ears and loudly shout _"LA LA LA! CAN'T HEAR YOU!"_ while carefully picking models that don't exhibit the problem.
 </details>
@@ -1808,7 +1808,7 @@ function createSolidColorTexture(r, g, b, a) {
 }
 ```
 
-As you start expanding material support in your own code you'll likely find that you need a transparent black texture as a default for properites like emissive colors and a default normal texture as well:
+As you start expanding material support in your own code you'll likely find that you need a transparent black texture as a default for properties like emissive colors and a default normal texture as well:
 
 ```js
 const opaqueWhiteTexture = createSolidColorTexture(1, 1, 1, 1);
@@ -1818,7 +1818,7 @@ const defaultNormalTexture = createSolidColorTexture(0.5, 0.5, 1, 1);
 
 ### Associating materials with primitives
 
-After that's been done make sure to associate the primitive with the bind group we just created during the primitive setup. We can start by adding the material properties to the primitve GPU data we're already tracking.
+After that's been done make sure to associate the primitive with the bind group we just created during the primitive setup. We can start by adding the material properties to the primitive GPU data we're already tracking.
 
 ```js
 setupPrimitive(gltf, primitive, primitiveInstances, materialGpuData) {
@@ -1996,7 +1996,7 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
   // Get the combined base color from the texture and baseColorFactor.
   let baseColor = textureSample(baseColorTexture, materialSampler, input.texcoord) * material.baseColorFactor;
 
-  // Omitting remaineder of fragment shader, which is unchanged...
+  // Omitting remainder of fragment shader, which is unchanged...
 }
 ```
 
@@ -2027,7 +2027,7 @@ There's a variant of the same trick where you can generate a much smaller buffer
 
 Also, if the attribute that you are missing is something like a normal then blindly using a buffer full of zeros as your normal attribute will result in broken lighting. You'd need to generate reasonable normals based off the model geometry, which is much more involved.
 
-A different approach, and the one that we'll cover here, is to create a new variant of the shader that accounts for the missing atributes somehow. As a general rule you want to avoid shader variants as much as possible, for all the same reasons you want to avoid pipeline variants, but sometimes it's simply the most effective approach.
+A different approach, and the one that we'll cover here, is to create a new variant of the shader that accounts for the missing attributes somehow. As a general rule you want to avoid shader variants as much as possible, for all the same reasons you want to avoid pipeline variants, but sometimes it's simply the most effective approach.
 
 ### Caching shader variants
 
@@ -2077,7 +2077,7 @@ function getPipelineForPrimitive(args) {
 
 How do we actually put those arguments to use when building the shader? In this case, we need to either add or omit the `@location() texcoord : vec2f` from the vertex inputs depending on the value of `args.hasTexcoord`.
 
-If you are coming to WebGPU from WebGL, you might be familiar with using GLSL preprocessor statements to conditionally switch code on and off. Unfortunately if you go looking for a similar mechanism in WGSL you'll be dissapointed to learn that it has none.
+If you are coming to WebGPU from WebGL, you might be familiar with using GLSL preprocessor statements to conditionally switch code on and off. Unfortunately if you go looking for a similar mechanism in WGSL you'll be disappointed to learn that it has none.
 
 Instead you have to rely on JavaScript's string manipulation mechanisms to get by. At it's simplest this could mean basic string concatenation.
 
@@ -2194,7 +2194,7 @@ Click to launch **Sample 05 - Materials**](https://toji.github.io/webgpu-gltf-ca
 
 Now that we've got a system in place for creating shader variants whenever we need it, it can be very tempting to want to apply that to everything! For example, what about when a material doesn't include a particular texture channel? Why not create a new shader variant that omits the texture lookup! That feels like an obvious optimization opportunity (especially for things like normal, occlusion, or emissive maps). Unfortunately it's generally not a great idea.
 
-Why? Well, first off, every shader variant that we create obviously requires a new render pipeline. T he more combinations of shader variants that can be created the more likely you are to have the number of shaders (and thus pipelines) you are using explode. We just spent a majority of this document finding ways to reduce the number of pipelines we're using! Let's not sabatoge that with overly aggressive shader customization now!
+Why? Well, first off, every shader variant that we create obviously requires a new render pipeline. T he more combinations of shader variants that can be created the more likely you are to have the number of shaders (and thus pipelines) you are using explode. We just spent a majority of this document finding ways to reduce the number of pipelines we're using! Let's not sabotage that with overly aggressive shader customization now!
 
 It's fairly unlikely that the cycles saved by, for instance, not sampling the occlusion map are going to make up for the overhead of more pipeline switching. It's often better to simply use a default texture and sample from it like usual, especially because the default textures _should_ be a single pixel, which means the value will be very effectively cached!
 
@@ -2210,11 +2210,11 @@ At this point we've taken the material rendering as far as this document is goin
 
 Prior to the addition of materials our render loop was pretty tight, with a reasonably minimal amount of state setting to draw our scene. Now, however, we've added back in a per-primitive `setBindGroup()` for the material properties after working so hard to remove one in the instancing section. Is there anything we can do about that?
 
-Turns out, yes! One thing we should consider is that it's fairly common for models, especially larger ones, to share materials across multiple meshes/primitives. Think of, for instance, the "sponza" scene. That model contains 25 materials and 33 primitives (many of which are instanced). Obviously some of the primitves must use the same material.
+Turns out, yes! One thing we should consider is that it's fairly common for models, especially larger ones, to share materials across multiple meshes/primitives. Think of, for instance, the "sponza" scene. That model contains 25 materials and 33 primitives (many of which are instanced). Obviously some of the primitives must use the same material.
 
 Given this, it's likely that at least a few of our `setBindGroup()` calls are redundant. It would be nice to eliminate those, right?
 
-Thinking through the chain of dependencies, any given material may have properties which change the render pipeline, but there's also a good chance that many materials will share a pipeline (assuming the primitives using the material have compatible buffer layouts). We can also predict that the number of materials in our scene will be greater than or equal to the number of pipielines, and the number of primitives will be greater than or equal to the number of materials. As such, ideally we'd like our render loop to look a bit more like this:
+Thinking through the chain of dependencies, any given material may have properties which change the render pipeline, but there's also a good chance that many materials will share a pipeline (assuming the primitives using the material have compatible buffer layouts). We can also predict that the number of materials in our scene will be greater than or equal to the number of pipelines, and the number of primitives will be greater than or equal to the number of materials. As such, ideally we'd like our render loop to look a bit more like this:
 
 * For each pipeline
    * Set pipeline
@@ -2245,7 +2245,7 @@ function getPipelineForPrimitive(args) {
 }
 ```
 
-We'll populate that map in `setupPrimitive()`. Every time we get the `primitive`'s pipieline we'll look up the `primitive`'s current `gpuMaterial` in the map. If it's not present we'll add a new array to the map with the `gpuMaterial` as the key. The primitives using that material will then be pushed onto the array. It's very close to the previous system, with just one extra level of indirection to allow us to save the material relationship. (This change also means we can stop saving the material on the `gpuPrimitive` itself.)
+We'll populate that map in `setupPrimitive()`. Every time we get the `primitive`'s pipeline we'll look up the `primitive`'s current `gpuMaterial` in the map. If it's not present we'll add a new array to the map with the `gpuMaterial` as the key. The primitives using that material will then be pushed onto the array. It's very close to the previous system, with just one extra level of indirection to allow us to save the material relationship. (This change also means we can stop saving the material on the `gpuPrimitive` itself.)
 
 ```js
 function setupPrimitive(gltf, primitive, primitiveInstances, materialGpuData) {
@@ -2279,7 +2279,7 @@ function setupPrimitive(gltf, primitive, primitiveInstances, materialGpuData) {
 
 ### Updating the render loop for the new structure
 
-Now to make use of this new structure we need to make on final, relatively small change to our render loop. Instead of iterating through the primitives for each pipeline, we're now going to iterate over the `materialPrimitives` entries, getting both the material and the list of associated primitives. We can set the material's bind group once, then loop over all the primitves and render them as we did before.
+Now to make use of this new structure we need to make on final, relatively small change to our render loop. Instead of iterating through the primitives for each pipeline, we're now going to iterate over the `materialPrimitives` entries, getting both the material and the list of associated primitives. We can set the material's bind group once, then loop over all the primitives and render them as we did before.
 
 ```js
 function renderGltf(renderPass) {
@@ -2325,7 +2325,7 @@ Good tooling can also reduce the size of your files. While they're not covered h
 
 Finally, some hand editing of meshes can be great for performance. For example, the "sponza" scene used throughout these samples actually isn't the one from the Khronos samples repository! It's an [optimized version](https://github.com/toji/sponza-optimized) of the mesh that I edited by hand in Blender in order to make better use of instancing (which also happened to make it a smaller download.) This was time consuming, but if you happen to be working with an artist who's creating models for your project some communication about which techniques work best for rendering efficiency up front can go a long way. (In "sponza" this mostly came down to the difference in using linked duplicates instead of full mesh copies for repeated elements.)
 
-Of course, not everyone has the luxury of being able to preprocess their assets before they're loaded. Some usecases, such as the [&lt;model-viewer&gt;](https://modelviewer.dev/) web component, need to be able to load pretty much any assets that they're given from any source. Fortunately, while some models may be less ideal than others, the patterns we've gone through in this document should work well in almost any situation.
+Of course, not everyone has the luxury of being able to preprocess their assets before they're loaded. Some use cases, such as the [&lt;model-viewer&gt;](https://modelviewer.dev/) web component, need to be able to load pretty much any assets that they're given from any source. Fortunately, while some models may be less ideal than others, the patterns we've gone through in this document should work well in almost any situation.
 
 ## That's a wrap!
 

@@ -7,7 +7,7 @@ comments: true
 
 ## Introduction
 
-WebGPU compute shaders are powerful tools for doing highly parallel work on large data sets. In order to achive that performance, however, they have multiple restrictions on how the shaders can input and output data. In many cases it's not too difficult to package the data in such a way that it's compatible with those rules, but in cases where you can't control the format of the data coming in you'll need to find creative workarounds. One common scenario where you'll frequently run into mismatches between the structure of the input data and the requirements of a compute shader is when working with **vertex data**.
+WebGPU compute shaders are powerful tools for doing highly parallel work on large data sets. In order to achieve that performance, however, they have multiple restrictions on how the shaders can input and output data. In many cases it's not too difficult to package the data in such a way that it's compatible with those rules, but in cases where you can't control the format of the data coming in you'll need to find creative workarounds. One common scenario where you'll frequently run into mismatches between the structure of the input data and the requirements of a compute shader is when working with **vertex data**.
 
 This doc is focused on walking through several typical examples of manipulating vertex data in a compute shader and patterns that can be used to overcome some the the restrictions that can make it difficult. The patterns presented are not exclusive to working with vertex data, it just happens to be a good real-world illustration of the issues that you may encounter.
 
@@ -20,7 +20,7 @@ For the purposes of this doc, **"Vertex data"** is the information that is fed i
 Since `GPUBuffer`s are just blobs of binary data, the structure of the attributes within the vertex buffers has to be explicitly defined. This is given when creating a `GPURenderPipeline` like so:
 
 ```js
-// An extremly simplistic vertex shader for demonstration purposes.
+// An extremely simplistic vertex shader for demonstration purposes.
 const shaderSrc = `
   struct VertexData {
     @location(0) position: vec3f,
@@ -118,7 +118,7 @@ Finally, the operation itself is really simple: We read in the normal vector, mu
 
 <details markdown=block>
   <summary markdown=span><b>Click here to see how to invoke this shader in JavaScript</b></summary>
-  For the sake of brevity I'm not going to provide accompanying JavaScript code for every shader snippet in this doc, but for the sake of reference, here's roughtly what the WebGPU calls necessary to dispatch the above shader would look like:
+  For the sake of brevity I'm not going to provide accompanying JavaScript code for every shader snippet in this doc, but for the sake of reference, here's roughly what the WebGPU calls necessary to dispatch the above shader would look like:
 
   ```js
   // One time initialization of the pipeline and uniform buffer
@@ -272,7 +272,7 @@ One tempting option for handling the buffer offsets is to supply them during bin
 The solution is to simply pass the offset in as a uniform and factor it into our manual indexing, just like the stride.
 
 ```rs
-// Parial normalInvertSrc
+// Partial normalInvertSrc
 
 struct VertexUniforms {
   count: u32,
@@ -531,7 +531,7 @@ You'll want to select which of those joint unpacking methods to use at pipeline 
 
 ### Unpacking/packing non-32 bit floats
 
-Extracting 8 or 16 bit integer values from 32 bit integer values is pretty straightforward, as you can see above. If you happen to have floating point values that aren't 32 bit, though, you need to take a different approach. Normally the alroithims for unpacking binary16 (or "half") floats into a 32 bit ones from a `u32` value is [a non-trivial operation](https://en.wikipedia.org/wiki/Half-precision_floating-point_format), and beyond the scope of this document. Fortunately WGSL has some functions to help you out here.
+Extracting 8 or 16 bit integer values from 32 bit integer values is pretty straightforward, as you can see above. If you happen to have floating point values that aren't 32 bit, though, you need to take a different approach. Normally the algorithms for unpacking binary16 (or "half") floats into a 32 bit ones from a `u32` value is [a non-trivial operation](https://en.wikipedia.org/wiki/Half-precision_floating-point_format), and beyond the scope of this document. Fortunately WGSL has some functions to help you out here.
 
 First, there's the [`unpack2x16float()` builtin function](https://gpuweb.github.io/gpuweb/wgsl/#unpack2x16float-builtin). This will take a single `u32` value and return a `vec2f` containing the converted 16-bit floats from either half of the `u32` binary value. The [`pack2x16float()` builtin function](https://gpuweb.github.io/gpuweb/wgsl/#pack2x16float-builtin) is also provided to go the other direction, encoding a `vec2f` as a single `u32` value.
 
@@ -589,7 +589,7 @@ function generateNormals(positions, vertexCount, indices, indexCount) {
 }
 ```
 
-The most important part of the code to understand for our purposes is that it does one pass to accumulate all of the face normals into the vertex normals, and then another pass to normalze those accumulated values. It can do this easily because it's just doing linear loops over the data in a single thread.
+The most important part of the code to understand for our purposes is that it does one pass to accumulate all of the face normals into the vertex normals, and then another pass to normalize those accumulated values. It can do this easily because it's just doing linear loops over the data in a single thread.
 
 ### Converting to compute shaders
 
@@ -661,15 +661,15 @@ fn normalizeNormals(@builtin(global_invocation_id) globalId : vec3u) {
 }
 ```
 
-It's a pretty strightforward analog for the JavaScript version of the same code, modulo the necessary changes for reading in the positions and, of course, removal of the loops. Because shaders, by their very nature, loop through large data sets performing the same operations on each element. And crucially, they do it in a massively parallel fashion.
+It's a pretty straightforward analog for the JavaScript version of the same code, modulo the necessary changes for reading in the positions and, of course, removal of the loops. Because shaders, by their very nature, loop through large data sets performing the same operations on each element. And crucially, they do it in a massively parallel fashion.
 
 Turns out, that causes a problem for us. While it's ideal for the shader to be operating on lots of data in parallel, that means that we might (read: almost certainly will) have multiple threads all attempting to add a face normal to the same vertex normal at the same time. This is a classic threading problem, and if you don't take steps to synchronize those operations somehow, you're going to have a Bad Time™️.
 
 ### Synchronizing data access with atomics
 
-Fortunately WGSL provides us with [Atomic types and functions](https://gpuweb.github.io/gpuweb/wgsl/#atomic-builtin-functions)! These operations ensure that only one shader thread is allowed to update or read a specific bit of information at a time, which is exaclty what we need in this case to stop all those normal accumulations from accidentally stomping on eachother. _Unfortunately_ the only types that are allowed to be atomic are scalar `i32` and `u32` values. Which isn't particularly helpful when we definitely want our normals to be vectors of floating point values.
+Fortunately WGSL provides us with [Atomic types and functions](https://gpuweb.github.io/gpuweb/wgsl/#atomic-builtin-functions)! These operations ensure that only one shader thread is allowed to update or read a specific bit of information at a time, which is exactly what we need in this case to stop all those normal accumulations from accidentally stomping on each other. _Unfortunately_ the only types that are allowed to be atomic are scalar `i32` and `u32` values. Which isn't particularly helpful when we definitely want our normals to be vectors of floating point values.
 
-The way that we solve this is to quantitize the floating point value into an `i32`, effectively representing it as a fixed point precision value during the accumulation stage. This allows us to expose the normal values as atomics and use operations like [`atomicAdd()`](https://gpuweb.github.io/gpuweb/wgsl/#atomic-rmw) on the individual components.
+The way that we solve this is to quantize the floating point value into an `i32`, effectively representing it as a fixed point precision value during the accumulation stage. This allows us to expose the normal values as atomics and use operations like [`atomicAdd()`](https://gpuweb.github.io/gpuweb/wgsl/#atomic-rmw) on the individual components.
 
 Worth noting that because atomics can't be vectors, however, we need to fall back to some of the same patterns for writing/reconstructing vectors from flat arrays as we use elsewhere.
 
@@ -693,10 +693,10 @@ struct InputUniforms {
 @group(0) @binding(3) var<storage, read_write> quantized_normals: array<atomic<i32>>;
 
 // NEW: Utility function to convert and add a vec3f to the quantized normal array
-const QUANTIIZE_FACTOR = 32768.0;
+const QUANTIZE_FACTOR = 32768.0;
 fn addToOutput(index: u32, value: vec3f) {
   // Converts the floating point vector to a quantized signed integer vector
-  let quantizedValue = vec3i(value * QUANTIIZE_FACTOR);
+  let quantizedValue = vec3i(value * QUANTIZE_FACTOR);
   // Add each vector component to the atomic array individually.
   atomicAdd(&quantized_normals[index*3], quantizedValue.x);
   atomicAdd(&quantized_normals[index*3+1], quantizedValue.y);
@@ -772,12 +772,12 @@ fn normalizeNormals(@builtin(global_invocation_id) globalId : vec3u) {
 }
 ```
 
-You can see that this is really just the reverse of the quantization and destructuring of the normal vectors that was done in the prior shader. We fetch the individual values out of the storage buffer, pack them into a `vec3f`, and multiply by the inverse of the quatization value to get the final, accumulated normal. It's then normalized and written out to the destination buffer, when it can then presumably be used as a vertex attribute accompanying the original buffer with the positions in it.
+You can see that this is really just the reverse of the quantization and destructuring of the normal vectors that was done in the prior shader. We fetch the individual values out of the storage buffer, pack them into a `vec3f`, and multiply by the inverse of the quantization value to get the final, accumulated normal. It's then normalized and written out to the destination buffer, when it can then presumably be used as a vertex attribute accompanying the original buffer with the positions in it.
 
 ## Have fun, and make cool stuff!
 
 That's a quick look at some of the patterns that can be used when working with vertex data in compute shaders, though as mentioned earlier they apply to any input data that doesn't perfectly fit with compute shaders data alignment rules.
 
-Compute shaders unlock so many interesting possibilities for WebGPU, both for graphical uses and beyond, so it's a little unfortunate that they can require this type of jumping through hoops to coerce them into working with your data, but it's a managable task and the performance benefits can be immense!
+Compute shaders unlock so many interesting possibilities for WebGPU, both for graphical uses and beyond, so it's a little unfortunate that they can require this type of jumping through hoops to coerce them into working with your data, but it's a manageable task and the performance benefits can be immense!
 
 Good luck on whatever projects are ahead of you, I can't wait to see what the spectacularly creative web community builds!

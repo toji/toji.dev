@@ -7,7 +7,7 @@ comments: true
 
 ## Introduction
 
-If you are developing a WebGPU variant of an existing WebGL application it's natural to want to benchmark the two to determine either where performance needs to be improved or how much faster one is relative the other. There's several easy-to-miss differences between how WebGL and WebGPU behave, though, that can lead to an innacurate comparisons if not taken into account.
+If you are developing a WebGPU variant of an existing WebGL application it's natural to want to benchmark the two to determine either where performance needs to be improved or how much faster one is relative the other. There's several easy-to-miss differences between how WebGL and WebGPU behave, though, that can lead to an inaccurate comparisons if not taken into account.
 
 This doc covers some simple considerations to take into account when comparing WebGPU and WebGL pages to ensure that you're getting the most accurate, "apples-to-apples" picture of their performance.
 
@@ -29,7 +29,7 @@ Oops! You've already opened the door to an invalid comparison!
 
 ### Ensure both APIs use the same GPU
 
-The primary issue with the above code is that in both cases it allows the underlying browers to determine which GPU will be used for the subsequent API calls. If you are on a device with only one GPU that's not a problem, but many laptops have both an integrated and discrete GPU, and they frequently have significantly different performance! Furthermore, the internal logic the browser uses to choose a GPU can be different for each API. For example, Chrome will default to selecting a low-powered GPU for WebGPU if it detects that your laptop is on battery power, and a high-powered GPU if it detects that you're plugged in. The same logic doesn't exist for WebGL, which instead prefers to default to the GPU that is currently being used by Chrome's compositor.
+The primary issue with the above code is that in both cases it allows the underlying browsers to determine which GPU will be used for the subsequent API calls. If you are on a device with only one GPU that's not a problem, but many laptops have both an integrated and discrete GPU, and they frequently have significantly different performance! Furthermore, the internal logic the browser uses to choose a GPU can be different for each API. For example, Chrome will default to selecting a low-powered GPU for WebGPU if it detects that your laptop is on battery power, and a high-powered GPU if it detects that you're plugged in. The same logic doesn't exist for WebGL, which instead prefers to default to the GPU that is currently being used by Chrome's compositor.
 
 This can lead to situations where, for example, the WebGPU page can select the much more powerful discrete GPU while WebGL gets kicked to the integrated GPU. Unsurprisingly, the WebGPU content is likely to perform much better in this scenario! But that doesn't indicate much about the API being used or the quality of your code calling it. Instead you're mostly measuring the difference in performance between two different pieces of hardware, which probably wasn't your goal.
 
@@ -143,7 +143,7 @@ const gl = canvas.getContext('webgl', {
 
 Conversely, if a depth/stencil buffer is used in WebGL ensure that you are passing an equivalent WebGPU depth/stencil texture to the appropriate render passes.
 
-Unfortunately the [WebGL spec is unclear on exactly what format of depth/stencil buffer will be allocated](https://registry.khronos.org/webgl/specs/latest/1.0/#WEBGLCONTEXTATTRIBUTES), it merely says that any depth buffer will be at least 16 bits and any stencil buffer will be at least 8 bits.  You can query the exact precision by calling `gl.getParamter(gl.DEPTH_BITS)` and `gl.getParamter(gl.STENCIL_BITS)`. In Chrome, at least, this is very likely to be a [ `GL_DEPTH24_STENCIL8_OES`](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/platform/graphics/gpu/drawing_buffer.cc;drc=8ee9326b165ffd2d2575df34b054b435f0253871;l=1320) renderbuffer (even if stencil wasn't explicitly requested, as a compatibility workaround.)
+Unfortunately the [WebGL spec is unclear on exactly what format of depth/stencil buffer will be allocated](https://registry.khronos.org/webgl/specs/latest/1.0/#WEBGLCONTEXTATTRIBUTES), it merely says that any depth buffer will be at least 16 bits and any stencil buffer will be at least 8 bits.  You can query the exact precision by calling `gl.getParameter(gl.DEPTH_BITS)` and `gl.getParameter(gl.STENCIL_BITS)`. In Chrome, at least, this is very likely to be a [ `GL_DEPTH24_STENCIL8_OES`](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/platform/graphics/gpu/drawing_buffer.cc;drc=8ee9326b165ffd2d2575df34b054b435f0253871;l=1320) renderbuffer (even if stencil wasn't explicitly requested, as a compatibility workaround.)
 
 The equivalent [WebGPU depth/stencil format](https://gpuweb.github.io/gpuweb/#depth-formats) would be a `'depth24plus-stencil8'` texture, though you can use a `'depth24plus'` texture if no stencil is required and `'stencil8'` if no depth is required.
 

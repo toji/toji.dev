@@ -36,7 +36,7 @@ Here you can see that using a bundle allowed the same work to be dispatched to t
 
 For applications that are **CPU bound**, meaning that they're having trouble feeding work to the GPU fast enough, render bundles can offer a valuable optimization tool. It's worth noting, however, that if a given WebGPU application is **GPU bound**, in that the main thing limiting it's performance is the GPU's fill rate or vertex processing speed, then using render bundles won't magically improve performance. They only reduce the CPU-side overhead of submitting commands.
 
-Still, it's rarely a bad idea to reduce CPU usage, even if that's not the primary bottleneck in your app! It can improve battery life, allow more overhead for other CPU operations, and potentially expand the range of devices your app works well on! Using render bundles where you can will rarely be deterimental to your application's performance.
+Still, it's rarely a bad idea to reduce CPU usage, even if that's not the primary bottleneck in your app! It can improve battery life, allow more overhead for other CPU operations, and potentially expand the range of devices your app works well on! Using render bundles where you can will rarely be detrimental to your application's performance.
 
 ## Using Render Bundles
 
@@ -63,7 +63,7 @@ function encodeRenderCommands(encoder) {
 
 function onFrame() {
   const commandEncoder = device.createCommandEncoder();
-  const passEncoder = commandEncoder.beginRenderPass({ /* Ommitted for brevity */});
+  const passEncoder = commandEncoder.beginRenderPass({ /* Omitted for brevity */});
 
   encodeRenderCommands(passEncoder);
 
@@ -103,7 +103,7 @@ const renderBundle = bundleEncoder.finish();
 
 function onFrame() {
   const commandEncoder = device.createCommandEncoder();
-  const passEncoder = commandEncoder.beginRenderPass({ /* Ommitted for brevity */});
+  const passEncoder = commandEncoder.beginRenderPass({ /* Omitted for brevity */});
 
   // Execute the pre-recorded bundle
   passEncoder.executeBundles([renderBundle]);
@@ -120,7 +120,7 @@ Notice how the actual encoding of the render commands didn't need to change at a
  - Perform occlusion queries
  - Execute other render bundles.
 
-As a result in many cases you can use a `GPURenderPassEncoder` and a `GPURenderBundleEncoder` interchangably for functions like our `encodeRenderCommands()` above and the code frequently won't need to know which one it's dealing with.
+As a result in many cases you can use a `GPURenderPassEncoder` and a `GPURenderBundleEncoder` interchangeably for functions like our `encodeRenderCommands()` above and the code frequently won't need to know which one it's dealing with.
 
 ## Render Bundle state management
 
@@ -165,7 +165,7 @@ const renderBundleB = bundleEncoder.finish();
 
 function onFrame() {
   const commandEncoder = device.createCommandEncoder();
-  const passEncoder = commandEncoder.beginRenderPass({ /* Ommitted for brevity */});
+  const passEncoder = commandEncoder.beginRenderPass({ /* Omitted for brevity */});
 
   // Execute the pre-recorded bundles
   passEncoder.executeBundles([renderBundleA, renderBundleB]);
@@ -219,7 +219,7 @@ const renderBundleB = bundleEncoder.finish();
 
 function onFrame() {
   const commandEncoder = device.createCommandEncoder();
-  const passEncoder = commandEncoder.beginRenderPass({ /* Ommitted for brevity */});
+  const passEncoder = commandEncoder.beginRenderPass({ /* Omitted for brevity */});
 
   // Execute the pre-recorded bundles
   passEncoder.executeBundles([renderBundleA, renderBundleB]);
@@ -235,7 +235,7 @@ This does lead to some repetition of state that wouldn't be necessary if the sam
 
 Because of the above mentioned requirements that render bundles contain all the state setting needed for the draw calls they execute, the general guideline is that you want to include as many draw calls in your render bundles as is practical. If your entire scene can be rendered with one big render bundle, then great! Do that!
 
-Keep in mind, however, that render bundles are only really effective if they can be executed more than once. If you find yourself in a situation where you are rebuilding your render bundles on a per-frame basis to accomodate new or updated draw calls then you may be better off simply doing the draws directly.
+Keep in mind, however, that render bundles are only really effective if they can be executed more than once. If you find yourself in a situation where you are rebuilding your render bundles on a per-frame basis to accommodate new or updated draw calls then you may be better off simply doing the draws directly.
 
 Similarly, there's some types of WebGPU content that actively requires frequent changes to the resources used, such as [External Textures](https://gpuweb.github.io/gpuweb/#gpuexternaltexture). Created from video streams, these textures expire once the video decoding has prepared the next frame, requiring a new external texture to be created to capture the new video frame, and a new bind group created to bind it. That means that any render bundle that includes an external texture is likely to be made invalid by the texture expiring within a frame or two of it's creation. As a result it's generally not advised to use render bundles and External Textures together.
 
@@ -265,7 +265,7 @@ It follows, then, that ANY content that uses a buffer or texture has the potenti
 
 ### Indirect Draws
 
-Being able to move and manipulate so many elements of the scene is powerful, but there's times where the draw calls themselves need to be updated to accomodate the desired effect. Consider, for example, particle effects. It's not unusual to have the number of particles change over the lifetime of the effect as new particle as spawned and existing particles expire. Since we can't alter the calls made in a render bundle this would seem to exclude something like particle effects from being included in the bundle, right?
+Being able to move and manipulate so many elements of the scene is powerful, but there's times where the draw calls themselves need to be updated to accommodate the desired effect. Consider, for example, particle effects. It's not unusual to have the number of particles change over the lifetime of the effect as new particle as spawned and existing particles expire. Since we can't alter the calls made in a render bundle this would seem to exclude something like particle effects from being included in the bundle, right?
 
 No! Fortunately for us WebGPU includes a feature known as "indirect drawing". Executed with the `drawIndirect()` and `drawIndexedIndirect()` commands, indirect draws function exactly like a normal draw call but with the critical difference that the arguments for the call are read from a buffer instead of being passed directly.
 

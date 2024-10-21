@@ -10,13 +10,13 @@ Device loss (also known as "context loss" in APIs like WebGL/OpenGL) is one of t
 
 ## What is device loss?
 
-Device loss is a falure state for the GPU where, for whatever reason, the driver simply can't continue processing commands any more. There's multiple reasons why it can happen that depend on the hardware, driver, or OS. For example, if thre's a crash in the driver this will probably be surfaced to your application as a device loss. It could also be the result of some extreme resource pressure. Many modern GPUs and APIs can handle out-of-memory errors without losing the device, but not all. Extremely long running shaders might also cause a loss. Driver updates or significant changes in device configuration may also be the cause of a device loss.
+Device loss is a failure state for the GPU where, for whatever reason, the driver simply can't continue processing commands any more. There's multiple reasons why it can happen that depend on the hardware, driver, or OS. For example, if there's a crash in the driver this will probably be surfaced to your application as a device loss. It could also be the result of some extreme resource pressure. Many modern GPUs and APIs can handle out-of-memory errors without losing the device, but not all. Extremely long running shaders might also cause a loss. Driver updates or significant changes in device configuration may also be the cause of a device loss.
 
 Additionally, when working in a browser, there may be times when the browser itself triggers a simulated device loss. One such example is that Chrome has a "watchdog" for the GPU process that will kill it (losing the device in the process) if the driver takes too long to complete an operation. (10 seconds or so). It may also be an intentional part of the API: The `GPUDevice` will report that it's been lost after the `destroy()` function is called. In that case it's not unexpected, but the effect on the device is the same as if it had been lost some other way. In either case the resources are destroyed and the device is unusable. The only difference is in how you may want to respond to it.
 
-### What is the conseequences of losing the device?
+### What is the consequences of losing the device?
 
-When a device is lost the `GPUDevice` object and any objects created with it all become unusable. The GPU memory associated with them is discarded and doing any futher GPU work will require you to get a new `GPUDevice` and upload all the resources again. This includes any buffers, textures, pipelines, etc. Doesn't matter if you've been using the device for rendering, only compute, or a mix. All of it is gone.
+When a device is lost the `GPUDevice` object and any objects created with it all become unusable. The GPU memory associated with them is discarded and doing any further GPU work will require you to get a new `GPUDevice` and upload all the resources again. This includes any buffers, textures, pipelines, etc. Doesn't matter if you've been using the device for rendering, only compute, or a mix. All of it is gone.
 
 Sound annoying? It is! It's aggravating for your users too. If your app doesn't handle the device loss at all they're going to see one of a few different possibilities:
  
@@ -24,7 +24,7 @@ Sound annoying? It is! It's aggravating for your users too. If your app doesn't 
  - The canvas on their page freezes on the last frame that was rendered.
  - If the page wasn't rendering to a canvas at all, such as if you're only doing compute work with the GPU, then the user may not get any feedback about the problem at all. It'll just... stop.
 
-For the user, best case scenario is that something does visibly go wrong, like a canvas turning black. It at least ives them a hint that they may want to try refreshing the page. But if things just fail with no feedback it can take a long time before they realize something is wrong, and it may not be clear to them on the next run if things are working properly or not. It's a recipie for frustration, over something that may not even be related to your page! Nobody wants frustrated users.
+For the user, best case scenario is that something does visibly go wrong, like a canvas turning black. It at least ives them a hint that they may want to try refreshing the page. But if things just fail with no feedback it can take a long time before they realize something is wrong, and it may not be clear to them on the next run if things are working properly or not. It's a recipe for frustration, over something that may not even be related to your page! Nobody wants frustrated users.
 
 That's why you owe it to them to do SOME form of lost device handling, even if only to acknowledge to them that it happened.
 
@@ -92,7 +92,7 @@ const requiredFeatures = {};
 if (adapter.features.has('texture-compression-bc`)) {
     requiredFeatures.push('texture-compression-bc`);
 } else {
-    // Fallback to a code path that doesn't reqire BC compression or inform the
+    // Fallback to a code path that doesn't require BC compression or inform the
     // user that their device is not supported.
 }
 
@@ -100,7 +100,7 @@ if (adapter.features.has('texture-compression-bc`)) {
 if (adapter.limits.maxTextureDimension2D >= 16384 ) {
     requiredLimits.maxTextureDimension2D = 16384;
 } else {
-    // Fallback to a code path that doesn't reqire larger textures or inform the
+    // Fallback to a code path that doesn't require larger textures or inform the
     // user that their device is not supported.
 }
 
@@ -126,7 +126,7 @@ Now that you're listening for the loss, what should you do if one happens? This 
 
 A decent percentage of the time that you encounter a device loss you may be able to recover from it by simply trying again. You can either build this into your code or, at the minimum, tell the user to do it.
 
-For some apps surfacing a message to the user that says "An error occurred. Refreshing the page may resolve the issue." could be sufficent. This is especially effective if the app doesn't have any user state that may be lost during the refresh. It's not particularly elegant and nobody likes being told that something broke, but at the very least it puts them on the right track!
+For some apps surfacing a message to the user that says "An error occurred. Refreshing the page may resolve the issue." could be sufficient. This is especially effective if the app doesn't have any user state that may be lost during the refresh. It's not particularly elegant and nobody likes being told that something broke, but at the very least it puts them on the right track!
 
 If you want to be a little bit fancier about it you can use `location.reload()` to trigger a reload yourself, but you should be more careful when that route. You should probably still show a message to the user and indicate that the page will reload after a short delay or when they click a link rather than immediately reload on failure, otherwise the user will simply see the whole page flicker and load again and not know why, making it feel even _more_ broken.
 
@@ -136,7 +136,7 @@ Often times WebGPU content will either be contained to a single element on a lar
 
 For example, for a WebGPU-based data visualization or background effect, you could simply restart it again from the beginning. (With an appropriate message to the user to explain why, of course!) Similarly with a compute-based experience you may want to simply restart whatever work you were doing again, such as re-loading an LLM and asking the user to re-submit their query.
 
-This is easier in WebGPU than WebGL, for what it's worth. Because WebGL contexts were tightly tied to a canvas element a context loss either meants going through a [series of event handling steps](https://registry.khronos.org/webgl/specs/latest/1.0/#5.15.2) to have the canvas re-issue a new context, or simply delete the canvas from the page and place a new one with a new WebGL context in it's place.
+This is easier in WebGPU than WebGL, for what it's worth. Because WebGL contexts were tightly tied to a canvas element a context loss either meant going through a [series of event handling steps](https://registry.khronos.org/webgl/specs/latest/1.0/#5.15.2) to have the canvas re-issue a new context, or simply delete the canvas from the page and place a new one with a new WebGL context in it's place.
 
 With WebGPU, the `GPUDevice` is independent of the canvas that it renders to. Because of this, to restore a WebGPU device you simply create another one and re-configure the canvas to use it instead.
 
@@ -174,9 +174,9 @@ So, the best practice is to always get a new adapter right before you request a 
 
 Simply restarting becomes more aggravating for the user in cases where the user has some state on the page that they would lose when doing so. For example: A game where progress would be lost on restart or a product configuration tool where the defaults are restored when the WebGPU content is reloaded. In these cases you want to consider saving the user's state and restoring it when re-building the GPU resources.
 
-This takes significantly more effort because it requires your application to track all of the applicable state needed to restore the user back to a specific point. Anything that is tracked exclusively on the GPU (uniform buffers and such) will be lost, so you'll need to be syncing out restorable state to JavaScript (and ideally saving it to some sort of persistant storage mechanism like [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)).
+This takes significantly more effort because it requires your application to track all of the applicable state needed to restore the user back to a specific point. Anything that is tracked exclusively on the GPU (uniform buffers and such) will be lost, so you'll need to be syncing out restorable state to JavaScript (and ideally saving it to some sort of persistent storage mechanism like [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)).
 
-Because of this it's best if you build your app from the ground up with the ability to restore the user's progress in mind. For existing apps, hopfully you have already been doing that for other reasons (saving progress across browser sessions, filling out order forms, etc.)
+Because of this it's best if you build your app from the ground up with the ability to restore the user's progress in mind. For existing apps, hopefully you have already been doing that for other reasons (saving progress across browser sessions, filling out order forms, etc.)
 
 You should consider which aspects of your app are important to restore if needed. The exact position of every particle in a particle system is unlikely to be important to the user, for example, but the color that they chose for a product or the position of a game character in the world are more important to preserve.
 
@@ -216,4 +216,3 @@ simulateDeviceLoss(); // Will trigger the "unexpected" code path.
 Note that this [won't replicate the _exact_ conditions of an actual device loss.](https://github.com/gpuweb/gpuweb/issues/4177) But it should be good enough for most testing, and there's a possibility that we might add a feature to force an actual device loss for testing, [like we have for WebGL](https://registry.khronos.org/webgl/extensions/WEBGL_lose_context/). No guarantees or timelines have been given for such a feature, though.
 
 In Chrome a more manual way to test a more realistic device loss is to open up a separate tab from your WebGPU page and navigate to "about:gpucrash". This will kill the entire GPU process and bring it back up again, losing any WebGPU (and WebGL!) devices in the process. Please note that this is subject to the "three strikes" rule mentioned above! If you crash this way three times any origins that open at the time will lose the ability to create new devices/contexts until the browser is restarted.
-
