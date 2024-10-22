@@ -14,7 +14,7 @@ Device loss is a failure state for the GPU where, for whatever reason, the drive
 
 Additionally, when working in a browser, there may be times when the browser itself triggers a simulated device loss. One such example is that Chrome has a "watchdog" for the GPU process that will kill it (losing the device in the process) if the driver takes too long to complete an operation. (10 seconds or so). It may also be an intentional part of the API: The `GPUDevice` will report that it's been lost after the `destroy()` function is called. In that case it's not unexpected, but the effect on the device is similar to if it had been lost some other way (more details on that later). In either case the resources are destroyed and the device is unusable. The only difference is in how you may want to respond to it.
 
-### What is the consequences of losing the device?
+### What are the consequences of losing the device?
 
 When a device is lost the `GPUDevice` object and any objects created with it all become unusable. The GPU memory associated with them is discarded and doing any further GPU work will require you to get a new `GPUDevice` and upload all the resources again. This includes any buffers, textures, pipelines, etc. Doesn't matter if you've been using the device for rendering, only compute, or a mix. All of it is gone.
 
