@@ -29,6 +29,7 @@ with WebGL or one of the native APIs. If you're interested in learning WebGPU, c
  - [WebGPU Render Bundle best practices](./render-bundles) - Covers usage of Render Bundles to reduce CPU overhead and how they can accomodate a variety of rendering needs.
  - [WebGPU/WebGL performance comparison best practices](./webgl-performance-comparison) - Covers considerations when comparing the performance of WebGPU and WebGL variants of the same content.
  - [WebGPU Indirect Draw best practices](./indirect-draws) - Covers a best practice for indirect draws and why it matters.
+ - [WebGPU Device Loss best practices](./device-loss) - Covers a best practice for handling device loss.
 
 ## Profiling
 

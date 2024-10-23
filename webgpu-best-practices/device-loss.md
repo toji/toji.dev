@@ -144,7 +144,7 @@ You should consider which aspects of your app are important to restore if needed
 
 ## What if restoring the Device fails?
 
-Something to be aware of is that there may be times where a Device Loss happens and you simply can't get another device back. This may happen because either the OS or the browser has determined that further use of the GPU is not allowed. For example: In Chrome if a specific origin causes a real device loss three times within a single browsing session then the browser will prevent that origin from creating any additional WebGPU devices.
+Something to be aware of is that there may be times where a Device Loss happens and you simply can't get another device back. This may happen because either the OS or the browser has determined that further use of the GPU is not allowed. For example: In Chrome if the GPU crashes a certain number of times in a given timespan it will stop allowing new adapters to be returned. ([See below](#chrome-specific-testing) for more details.) 
 
 For WebGPU this will surface as request adapter failing. It will return null, and you won't get any additional information about why. If this happens **after a device loss**, consider recommending that the user restart their browser or possibly device in order to fix the issue.
 
@@ -182,4 +182,15 @@ Note that this [won't replicate the _exact_ conditions of an actual device loss.
 
 Despite this, it should be good enough for most testing, and there's a possibility that we might add a feature to force an actual device loss for testing, [like we have for WebGL](https://registry.khronos.org/webgl/extensions/WEBGL_lose_context/). No guarantees or timelines have been given for such a feature, though.
 
-In Chrome a more manual way to test a more realistic device loss is to open up a separate tab from your WebGPU page and navigate to "about:gpucrash". This will kill the entire GPU process and bring it back up again, losing any WebGPU (and WebGL!) devices in the process. Please note that this is subject to the "three strikes" rule mentioned above! If you crash this way three times any origins that open at the time will lose the ability to create new devices/contexts until the browser is restarted.
+### Chrome specific testing
+
+In Chrome a more manual way to test a more realistic device loss is to open up a separate tab from your WebGPU page and navigate to "about:gpucrash". This will kill the entire GPU process and bring it back up again, losing any WebGPU (and WebGL!) devices in the process.
+
+Please note that crashing the GPU process, either intentionally or via some driver/system bug, triggers some rules limiting whether or not you'll be able to get a new WebGPU adapters (or WebGL contexts, for that matter):
+
+ - The first time the GPU process crashes you should be able to get a new adapter/device.
+ - If the GPU process crashes a second time within two minutes of the first crash, your page won't be able to get a new adapter. This limit is reset if the page is refreshed.
+ - If the GPU process crashes three times within two minutes then _all pages_ will be blocked from getting new adapters/devices. The only way to reset this limit is to wait for two minutes or restart the browser.
+ - There's a platform-specific crash frequency (something like 3-6 times within 5 minutes) beyond which the GPU process stops trying to come back at all. Once that limit is hit then the ONLY way to request new WebGPU adapters is to restart the browser.
+
+These limits can be avoided by starting the browser with the command line arguments `--disable-domain-blocking-for-3d-apis --disable-gpu-process-crash-limit`, at which point you can crash the GPU process with reckless abandon!

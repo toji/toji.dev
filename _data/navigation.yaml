@@ -26,5 +26,7 @@
       link: webgpu-best-practices/webgl-performance-comparison
     - name: Indirect Draws
       link: webgpu-best-practices/indirect-draws
+    - name: Device Loss
+      link: webgpu-best-practices/device-loss
     - name: Profiling with PIX
       link: webgpu-profiling/pix
