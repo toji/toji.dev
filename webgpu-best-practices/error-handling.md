@@ -1,6 +1,7 @@
 ---
 layout: page
 title: WebGPU Error Handling best practices
+date: 2024-06-04
 menubar_toc: true
 comments: true
 ---

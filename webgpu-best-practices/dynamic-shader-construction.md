@@ -2,6 +2,7 @@
 layout: page
 title: WebGPU Dynamic Shader Construction
 subtitle: Best practices
+date: 2023-04-19
 menubar_toc: true
 comments: true
 ---

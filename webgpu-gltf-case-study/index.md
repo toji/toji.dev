@@ -2,6 +2,7 @@
 layout: page
 title: Efficiently rendering glTF models
 subtitle: A WebGPU Case Study
+date: 2024-02-29
 menubar_toc: true
 comments: true
 ---

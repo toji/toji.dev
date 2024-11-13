@@ -1,6 +1,8 @@
 ---
 layout: page
 title: WebGPU Device Loss best practices
+last_updated: Oct 23, 2024
+date: 2024-10-23
 menubar_toc: true
 comments: true
 ---

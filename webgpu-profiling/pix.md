@@ -1,6 +1,7 @@
 ---
 layout: page
 title: Profiling WebGPU with PIX
+date: 2024-01-26
 menubar_toc: true
 comments: true
 ---

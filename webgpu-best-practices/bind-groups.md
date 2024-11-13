@@ -1,6 +1,7 @@
 ---
 layout: page
 title: WebGPU Bind Group best practices
+date: 2023-04-11
 menubar_toc: true
 comments: true
 ---

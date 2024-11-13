@@ -1,6 +1,7 @@
 ---
 layout: page
 title: WebGPU Indirect Draw best practices
+date: 2024-01-22
 menubar_toc: true
 comments: true
 ---

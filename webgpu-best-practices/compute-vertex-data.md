@@ -1,6 +1,7 @@
 ---
 layout: page
 title: Using WebGPU Compute Shaders with Vertex Data
+date: 2024-02-27
 menubar_toc: true
 comments: true
 ---

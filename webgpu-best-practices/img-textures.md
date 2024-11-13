@@ -2,6 +2,7 @@
 layout: page
 title: WebGPU &lt;img&gt;, &lt;canvas&gt;, and &lt;video&gt; Textures
 subtitle: Best practices
+date: 2023-06-01
 menubar_toc: true
 comments: true
 ---

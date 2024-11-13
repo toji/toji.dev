@@ -2,6 +2,7 @@
 layout: page
 title: WebGPU Buffer Uploads
 subtitle: Best practices
+date: 2023-02-03
 menubar_toc: true
 comments: true
 ---
