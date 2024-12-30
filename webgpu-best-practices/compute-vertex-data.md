@@ -631,7 +631,7 @@ fn accumulateNormals(@builtin(global_invocation_id) globalId : vec3u) {
 
   let index0 = indices[i+indexOffset];
   let index1 = indices[i+1+indexOffset];
-  let index1 = indices[i+2+indexOffset];
+  let index2 = indices[i+2+indexOffset];
 
   // Get the three vertex positions for the triangle
   let p0 = getPosition(index0);

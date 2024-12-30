@@ -10,8 +10,6 @@ comments: true
 
 If you use indirect drawing as part of your WebGPU application, put as many of the indirect draw args as you can into a single `GPUBuffer`. That's it. That's the whole best practice.
 
-_Temporary additional best practice: If running Chrome, use version 122 or higher. It includes a [significant optimization to indirect draw calls](https://bugs.chromium.org/p/dawn/issues/detail?id=2329). Chrome 122 is scheduled to be released as the stable version in late Feb 2024_
-
 ![But Why?](./media/butwhy.gif)
 
 Okay, fine. So you probably want a few more details than that.
@@ -53,7 +51,7 @@ One of the core features of WebGPU in the context of the browser is that it vali
 
 When making indirect calls we don't have an opportunity to do CPU-side validation of the call args. (Unless we read them back out of the buffer first, but that would be incredibly slow!) So we need to get more creative about how we ensure those calls are safe.
 
-On devices that use our Vulkan backend, like Android, Chrome is able to rely on the aforementioned [robustness features](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_EXT_robustness2.html) to ensure that shaders don't access memory not owned by the WebGPU device.
+On devices that use our Vulkan backend, like Android, Chrome is able to rely on the aforementioned [robustness features](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_EXT_robustness2.html) to ensure that shaders don't access memory not owned by the WebGPU device. (Edit: [jspanchu noted in the comments](https://github.com/toji/toji.dev/issues/10#issuecomment-2411674373) that Vulkan backends _can_ exhibit the same behavior as D3D12, so that just increases the need to coalesce your indirect draws!)
 
 On devices using our Metal backend we opted to use ["vertex pulling"](https://www.yosoygames.com.ar/wp/2018/03/vertex-formats-part-2-fetch-vs-pull/) for all of our vertex attributes, and thus can do a bounds check at the time the vertex data is fetched.
 
