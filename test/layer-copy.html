@@ -1,0 +1,55 @@
+<html>
+  <body>
+    Simple page testing copies from array textures. Creates a texture with two layers,
+    clears the first to red and the second to blue. Then uses copyTexSubImage2D to copy
+    the first layer to the left half of a 2D texture, and the second layer to the right
+    half. Finally, uses blitFramebuffer to copy that 2D texture to the canvas.
+    <br/><br/>
+    Problematic hardware is displaying red on both halves, meaning that both copies are
+    pulling from the first layer.
+    <br/>
+    <canvas id='c' width='512' height='256'></canvas>
+    <script>
+      const gl = c.getContext('webgl2', { antialias: false });
+      const size = c.height;
+
+      // Create the array texture
+      const layerTexture = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D_ARRAY, layerTexture);
+      gl.texStorage3D(gl.TEXTURE_2D_ARRAY, 1, gl.RGBA8, size, size, 2);
+
+      // Create the 2D texture
+      const sbsTexture = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, sbsTexture);
+      gl.texStorage2D(gl.TEXTURE_2D, 1, gl.RGBA8, size*2, size);
+
+      // Create a framebuffer for clearing/copying
+      const framebuffer = gl.createFramebuffer();
+      gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+
+      // Clear the first layer to red
+      gl.framebufferTextureLayer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, layerTexture, 0, 0);
+      gl.clearColor(1, 0, 0, 1);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+
+      // Clear the second layer to blue
+      gl.framebufferTextureLayer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, layerTexture, 0, 1);
+      gl.clearColor(0, 0, 1, 1);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+
+      // Copy the first layer to the left half of the 2D texture
+      gl.framebufferTextureLayer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, layerTexture, 0, 0);
+      gl.copyTexSubImage2D(gl.TEXTURE_2D, 0, 0, 0, 0, 0, size, size);
+
+      // Copy the second layer to the right half of the 2D texture
+      gl.framebufferTextureLayer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, layerTexture, 0, 1);
+      gl.copyTexSubImage2D(gl.TEXTURE_2D, 0, size, 0, 0, 0, size, size);
+
+      // Blit the 2D texture back to the canvas
+      gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
+      gl.bindFramebuffer(gl.READ_FRAMEBUFFER, framebuffer);
+      gl.framebufferTexture2D(gl.READ_FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, sbsTexture, 0);
+      gl.blitFramebuffer(0, 0, size*2, size, 0, 0, size*2, size, gl.COLOR_BUFFER_BIT, gl.NEAREST);
+    </script>
+  </body>
+</html>
