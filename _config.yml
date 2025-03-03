@@ -24,8 +24,12 @@ description: >- # this means to ignore newlines until "baseurl:"
   Brandon Jones - Graphics and XR on the web
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://toji.dev" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: tojiro
 github_username:  toji
+
+# Blog settings
+paginate: 5
+paginate_path: "/blog/page:num"
+hide_share_buttons: true
 
 # Build settings
 remote_theme: chrisrhymes/bulma-clean-theme@v0.14.0
@@ -42,6 +46,16 @@ defaults:
       type: "pages"
     values:
       hide_footer: true
+  -
+    scope:
+      path: ""
+      type: "posts"
+    values:
+      author: "Brandon Jones"
+      hide_footer: true
+      show_sidebar: true
+      comments: true
+      excerpt_separator: "<!--more-->"
 
 # Exclude from processing.
 # The following items will not be processed, by default.

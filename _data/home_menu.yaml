@@ -10,6 +10,8 @@
       link: http://tojicode.com/
 - label: Tech Writing
   items:
+    - name: Blog
+      link: blog
     - name: Articles
       link: articles
     - name: WebGPU Best Practices

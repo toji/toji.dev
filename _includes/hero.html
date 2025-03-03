@@ -15,7 +15,7 @@
                     </a>
                 </div>
             {% endif %}
-            {% if page.date %}
+            {% if page.layout != 'post' and page.date %}
                 <span>Last Updated: {{ page.date | date: '%b %-d, %Y' }}</span>
             {% endif %}
         </div>

@@ -6,6 +6,11 @@
   background-size: contain;
 }*/
 
+.content img {
+  display: block;
+  margin: auto;
+}
+
 @media screen and (max-width: 770px) {
   aside.menu::before {
     display: none;
