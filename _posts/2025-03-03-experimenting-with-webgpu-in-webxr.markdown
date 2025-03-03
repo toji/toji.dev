@@ -8,7 +8,7 @@ For the last few months I've been working on implementing experimental support f
 
 <!--more-->
 
-To enable Chrome's experimental WebGPU/WebXR integration, navigate to about:flags and enable **both** the "WebXR Projection Layers" and "WebXR/WebGPU Bindings" flags.
+To enable Chrome's experimental WebGPU/WebXR integration, navigate to about:flags and enable **both** the "WebXR Projection Layers" and "WebXR/WebGPU Bindings" flags. This should be available in Chrome Canary starting with version 135.0.7047.0.
 
 ![WebGPU/WebXR integration flags](/blog/media/webgpu-webxr-flags.png)
 
