@@ -48,7 +48,7 @@ In the `Arguments` tab:
  - Add `--disable-gpu-sandbox` to the `Arguments Passed On Launch` list
  - Add `--enable-dawn-features=use_user_defined_labels_in_backend` to the `Arguments Passed On Launch` list
  - Add `MTL_CAPTURE_ENABLED` with a value of `1` to the `Environmental Variables` list.
- - If you're going to be testing the same page repeatedly, it's useful to put it's URL as the last line of the `Arguments Passed On Launch`, which will cause Chrome to launch with that page open. 
+ - If you're going to be testing the same page repeatedly, it's useful to put the URL as the last line of the `Arguments Passed On Launch`, which will cause Chrome to launch with that page open. 
 
 ![XCode Scheme Arguments tab](./media/xcode-scheme-arguments.png)
 
@@ -108,13 +108,15 @@ The easy but noisy route is to select the Device and turn up the number of Comma
 
 The cleaner route would be to select a specific Command Queue from the list and capture just that. If you select the Command Queue created by WebGPU then you'll only capture submits from your WebGPU content! _However_, as you might notice from the screenshot above, there's nothing to differentiate the Command Queues. They also seem to appear in a semi-random order, so it's not like you can consistently pick the last one and know that it's going to be the WebGPU one. So while this has the potential to narrow the scope of your capture it's effectively a lottery.
 
-> Note: You can set a label on a CommandQueue, and this seems like the perfect place for XCode to surface that label, right? Unfortunately the labels don't show up here and that's [apparently a known issue](https://developer.apple.com/forums/thread/768061). If that ever get's resolved it would make this part of the process easier. In the meantime if you happen to know of a way to better determine which command queue is which in this list I'd love to hear it!
+> Note: You can set a label on an `MTLCommandQueue`, and this seems like the perfect place for XCode to surface that label, right? Unfortunately the labels don't show up here and that's [apparently a known issue](https://developer.apple.com/forums/thread/768061). If that ever get's resolved it would make this part of the process easier. In the meantime if you happen to know of a way to better determine which command queue is which in this list I'd love to hear it!
 
 Once you've got that all set up click the `Capture` button and wait for it to finish! (If the browser is minimized, on another desktop, or the page isn't animating you may need to open it and interact with it to produce enough submits to fulfill the capture limit you specified.)
 
+You should now have a Metal capture to browse through! Congratulations!
+
 ### Big Important Caveat!
 
-You should now have a Metal capture to browse through! Congratulations! However you may have noticed the browser has frozen, and even if you click the "Continue program execution" button in XCode... it doesn't come back.
+However you may have noticed the browser has frozen, and even if you click the "Continue program execution" button in XCode... it doesn't come back.
 
 It's not really clear to me why, but it appears that for the time being once you've snagged a Metal capture from Chrome with XCode the browser always hangs indefinitely and needs to be restarted. That means that **every capture is a one-shot affair**. You can get one good capture out of it before going through the entire process above, from "Preparing to Capture" down, over again. (This makes guessing at the Command Queue like I described above MUCH riskier!)
 

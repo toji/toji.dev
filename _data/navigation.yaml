@@ -3,7 +3,7 @@
 - name: Articles
   link: articles
   dropdown:
-    - name: Efficently rendering glTF models
+    - name: Efficiently rendering glTF models
       link: webgpu-gltf-case-study/
     - name: WebXR Scene Optimization
       link: webxr-scene-optimization/
