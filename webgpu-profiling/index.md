@@ -38,9 +38,9 @@ WebGPU's built-in timestamp queries can provide pass-level GPU timings.
 
 Microsoft's PIX tool supports D3D11 and D3D12 captures on Windows for more detailed timing and debugging.
 
-### XCode Metal Debugger
+### [XCode Metal Debugger](./xcode)
 
-[Coming Soon]
+Apple's XCode IDE supports Metal captures on MacOS for more detailed timing and debugging.
 
 ### RenderDoc is unsupported 🥺
 
