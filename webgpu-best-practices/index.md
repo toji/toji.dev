@@ -34,7 +34,7 @@ with WebGL or one of the native APIs. If you're interested in learning WebGPU, c
 ## Profiling
 
  - [PIX](../webgpu-profiling/pix) - Covers using Microsoft PIX to debug and profile Chrome WebGPU pages on Windows.
- - [XCode](../webgpu-profiling/xcode) - Covers using XCode to debug and profile Chrome WebGPU pages on MacOS.
+ - [Xcode](../webgpu-profiling/xcode) - Covers using Xcode to debug and profile Chrome WebGPU pages on MacOS.
 
 I've also written a much, much longer article about efficiently displaying glTF files in WebGPU. It's not necessarily a "best practices" doc, but it contains many useful WebGPU tips and patterns nonetheless, as well as working samples!
  - [Efficently rendering glTF models: A WebGPU case study ](https://toji.github.io/webgpu-gltf-case-study/)

@@ -32,5 +32,5 @@
       link: webgpu-best-practices/device-loss
     - name: Profiling with PIX
       link: webgpu-profiling/pix
-    - name: Profiling with XCode
+    - name: Profiling with Xcode
       link: webgpu-profiling/xcode
