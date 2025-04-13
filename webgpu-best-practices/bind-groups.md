@@ -623,7 +623,7 @@ const pipelineD = gpuDevice.createRenderPipeline({
 And finally, the bind groups themselves need to be created with the new groupings. This time we will also create them with an eye towards reducing duplication. Additionally, we'll take the opportunity to sort our meshes in a way that will reduce the amount of bind group setting that we need to do during the render loop:
 
 ```js
-const cameraBindGroup;
+let cameraBindGroup;
 const renderableMaterials = new Map();
 
 function createSceneBindGroups(meshes) {
