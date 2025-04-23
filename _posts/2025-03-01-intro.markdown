@@ -1,0 +1,13 @@
+---
+layout: post
+title: Blog Introduction
+tags: webxr webgpu
+---
+
+Hey all! I've added a blog section to the site to supplement the articles that I typically post on here.
+
+<!--more-->
+
+My general intent is to use blog posts to talk about things that are more transient or time sensitive than my typical
+article content, which should be applicable for a long time. Also, I may use it to just talk about non-development
+topics from time to time!
