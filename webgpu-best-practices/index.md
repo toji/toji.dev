@@ -10,6 +10,10 @@ most effective patterns for working with specific parts of the API, especially i
 with WebGL or one of the native APIs. If you're interested in learning WebGPU, check out the following resources first
 (and be sure to come back when you've figured out the basics!)
 
+### By Me
+ - [Your first WebGPU App](https://codelabs.developers.google.com/your-first-webgpu-app) - A codelab I wrote for Google I/O to introduce developers to WebGPU's basics.
+
+### Around the Web
  - [WebGPU Fundamentals](https://webgpufundamentals.org/) - In-depth walkthroughs of WebGPU concepts with live examples/visualizations
  - [Raw WebGPU](https://alain.xyz/blog/raw-webgpu) - A beautifully presented tutorial
  - [WebGPU: All the cores, none of the canvas](https://surma.dev/things/webgpu/) - A tutorial focused on using compute shaders
@@ -36,5 +40,7 @@ with WebGL or one of the native APIs. If you're interested in learning WebGPU, c
  - [PIX](../webgpu-profiling/pix) - Covers using Microsoft PIX to debug and profile Chrome WebGPU pages on Windows.
  - [Xcode](../webgpu-profiling/xcode) - Covers using Xcode to debug and profile Chrome WebGPU pages on MacOS.
 
-I've also written a much, much longer article about efficiently displaying glTF files in WebGPU. It's not necessarily a "best practices" doc, but it contains many useful WebGPU tips and patterns nonetheless, as well as working samples!
+## Long Form Articles
+
+I've also written a much longer article about efficiently displaying glTF files in WebGPU. It's not necessarily a "best practices" doc, but it contains many useful WebGPU tips and patterns nonetheless, as well as working samples!
  - [Efficently rendering glTF models: A WebGPU case study ](https://toji.github.io/webgpu-gltf-case-study/)

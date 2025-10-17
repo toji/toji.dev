@@ -7,6 +7,8 @@
       link: webgpu-gltf-case-study/
     - name: WebXR Scene Optimization
       link: webxr-scene-optimization/
+    - name: Your first WebGPU App (external)
+      link: https://codelabs.developers.google.com/your-first-webgpu-app
 - name: WebGPU Best Practices
   link: webgpu-best-practices/
   dropdown:
