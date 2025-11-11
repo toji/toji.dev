@@ -39,6 +39,7 @@ with WebGL or one of the native APIs. If you're interested in learning WebGPU, c
 
  - [PIX](../webgpu-profiling/pix) - Covers using Microsoft PIX to debug and profile Chrome WebGPU pages on Windows.
  - [Xcode](../webgpu-profiling/xcode) - Covers using Xcode to debug and profile Chrome WebGPU pages on MacOS.
+ - [RenderDoc](../webgpu-profiling/renderdoc) - Covers using RenderDoc to debug and profile Chrome WebGPU pages. Supported on Windows with D3D12 only, currently.
 
 ## Long Form Articles
 

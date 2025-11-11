@@ -36,3 +36,5 @@
       link: webgpu-profiling/pix
     - name: Profiling with Xcode
       link: webgpu-profiling/xcode
+    - name: Profiling with RenderDoc
+      link: webgpu-profiling/renderdoc

@@ -42,12 +42,6 @@ Microsoft's PIX tool supports D3D11 and D3D12 captures on Windows for more detai
 
 Apple's Xcode IDE supports Metal captures on MacOS for more detailed timing and debugging.
 
-### RenderDoc is unsupported 🥺
+### [RenderDoc](./renderdoc)
 
-RenderDoc is a popular open source GPU debugging tool for Vulkan, D3D, and OpenGL. Unfortunately, it appears that the developer has had bad experiences in the past with request for Chrome support stated that [debugging Chrome with RenderDoc is "explicitly not endorsed or supported"](https://github.com/baldurk/renderdoc/issues/2030#issuecomment-682434299)
-
-While [there is some code in RenderDoc to detect Chrome](https://github.com/baldurk/renderdoc/blob/aeaa2811f6afd411b260e740dce6208de4118e13/renderdoc/core/core.cpp#L316) it appears to only suppress crash handling, and so I don't think it's explicitly blocked, it just happens to be difficult to attach to due to architectural reasons. My initial attempts to use RenderDoc with Chrome have been unsuccessful nevertheless.
-
-If you have any experience debugging Chrome with RenderDoc that you can share please reach out and I'll publish it here for higher visibility!
-
-
+RenderDoc is a popular open source GPU debugging tool for Vulkan, D3D, and OpenGL. At the moment it has limited support for capturing WebGPU content with Chrome on Windows + D3D12.
