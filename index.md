@@ -47,6 +47,9 @@ Almost everything I work on is open source, with the majority of it being either
  - [Spookyball](https://spookyball.com/) - Halloween-themed breakout clone. One of the first WebGPU games.
  - [Efficiently rendering glTF with WebGPU](https://toji.github.io/webgpu-gltf-case-study/) - Article covering problems you may encounter when loading models with WebGPU and how to fix them.
 
+## A note on AI use
+All the content on this site is lovingly crafted by hand, with no AI used in it's creation. That means any mistakes you might find are plain old human error, not LLM hallucinations.
+
 <!--Included just to ensure that Mastodon verifies this site-->
 <a rel="me" href="https://mastodon.social/@tojiro"></a>
 
