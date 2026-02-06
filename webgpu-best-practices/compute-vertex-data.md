@@ -341,7 +341,7 @@ struct VertexInput {
   @location(1) texcoord : vec2f,
   @location(2) normal : vec3f,
   @location(3) joints : vec4u,
-  @location(3) weights : vec4f,
+  @location(4) weights : vec4f,
 };
 
 struct VertexOutput {
@@ -352,7 +352,7 @@ struct VertexOutput {
 
 @group(0) @binding(0) var<storage> inverseBindMatrices : array<mat4x4f>;
 @group(0) @binding(1) var<storage> skinMatrices : array<mat4x4f>;
-@group(0) @binding(2) var<uniform> viewProjectionMatrix : array<mat4x4f>;
+@group(0) @binding(2) var<uniform> viewProjectionMatrix : mat4x4f;
 
 // To perform skinning, we have to generate a skin matrix to transform the vertex with.
 fn getSkinMatrix(joints: vec4u, weights: vec4f) -> mat4x4f {
@@ -362,19 +362,19 @@ fn getSkinMatrix(joints: vec4u, weights: vec4f) -> mat4x4f {
   // joint's initial position so that only the delta from the meshes initial pose to the current
   // pose is applied. We multiply those together for each joint to get the transform that joint
   // would apply.
-  let joint0 = skinMatrices[input.joints.x] * inverseBindMatrices[input.joints.x];
-  let joint1 = skinMatrices[input.joints.y] * inverseBindMatrices[input.joints.y];
-  let joint2 = skinMatrices[input.joints.z] * inverseBindMatrices[input.joints.z];
-  let joint3 = skinMatrices[input.joints.w] * inverseBindMatrices[input.joints.w];
+  let joint0 = skinMatrices[joints.x] * inverseBindMatrices[joints.x];
+  let joint1 = skinMatrices[joints.y] * inverseBindMatrices[joints.y];
+  let joint2 = skinMatrices[joints.z] * inverseBindMatrices[joints.z];
+  let joint3 = skinMatrices[joints.w] * inverseBindMatrices[joints.w];
 
   // The vertex will assign each joint a weight, determining how much that joint affects the vertex.
   // The total of all the weights should add up to 1.0. This allows the "skeleton" to affect the
   // mesh more realistically. We multiply each joint's transform by the corresponding weight to get
   // the final skinned transform for this vertex.
-  return joint0 * input.weights.x +
-         joint1 * input.weights.y +
-         joint2 * input.weights.z +
-         joint3 * input.weights.w;
+  return joint0 * weights.x +
+         joint1 * weights.y +
+         joint2 * weights.z +
+         joint3 * weights.w;
 }
 
 @vertex
@@ -386,7 +386,7 @@ fn skinnedVertexMain(input : VertexInput) -> VertexOutput {
   // Both the position and the normal need to be multiplied by the skin matrix.
   // The position also needs to be multiplied by the view/projection matrix to display correctly.
   output.position = viewProjectionMatrix * skinMatrix * vec4f(input.position, 1);
-  output.normal = (skinMatrix * vec4f(input.normal, 0).xyz;
+  output.normal = (skinMatrix * vec4f(input.normal, 0)).xyz;
 
   // Texture coordinates aren't modified by skinning, so they get passed straight through.
   output.texcoord = input.texcoord;
@@ -418,10 +418,10 @@ struct VertexUniforms {
 };
 @group(0) @binding(0) var<uniform> vertex: VertexUniforms;
 
-@group(0) @binding(0) var<storage> positions: array<f32>;
-@group(0) @binding(1) var<storage> normals: array<f32>;
-@group(0) @binding(2) var<storage> joints: array<u32>;
-@group(0) @binding(3) var<storage> weights: array<f32>;
+@group(0) @binding(1) var<storage> positions: array<f32>;
+@group(0) @binding(2) var<storage> normals: array<f32>;
+@group(0) @binding(3) var<storage> joints: array<u32>;
+@group(0) @binding(4) var<storage> weights: array<f32>;
 
 // Helper functions to read the attributes from the arrays
 fn getPosition(index: u32) -> vec3f {
@@ -459,7 +459,7 @@ struct VertexOutput {
   position : vec3f,
   normal : vec3f,
 };
-@group(0) @binding(4) var<storage, read_write> outVerts: array<VertexOutput>;
+@group(0) @binding(5) var<storage, read_write> outVerts: array<VertexOutput>;
 
 // Skinning data
 @group(1) @binding(0) var<storage> inverseBindMatrices : array<mat4x4f>;
@@ -467,19 +467,19 @@ struct VertexOutput {
 
 // This function is identical to the vertex shader version!
 fn getSkinMatrix(joints: vec4u, weights: vec4f) -> mat4x4f {
-  let joint0 = skinMatrices[input.joints.x] * inverseBindMatrices[input.joints.x];
-  let joint1 = skinMatrices[input.joints.y] * inverseBindMatrices[input.joints.y];
-  let joint2 = skinMatrices[input.joints.z] * inverseBindMatrices[input.joints.z];
-  let joint3 = skinMatrices[input.joints.w] * inverseBindMatrices[input.joints.w];
+  let joint0 = skinMatrices[joints.x] * inverseBindMatrices[joints.x];
+  let joint1 = skinMatrices[joints.y] * inverseBindMatrices[joints.y];
+  let joint2 = skinMatrices[joints.z] * inverseBindMatrices[joints.z];
+  let joint3 = skinMatrices[joints.w] * inverseBindMatrices[joints.w];
 
-  return joint0 * input.weights.x +
-         joint1 * input.weights.y +
-         joint2 * input.weights.z +
-         joint3 * input.weights.w;
+  return joint0 * weights.x +
+         joint1 * weights.y +
+         joint2 * weights.z +
+         joint3 * weights.w;
 }
 
 @compute @workgroup_size(64)
-fn skinnedComputeMain(input : VertexInput) -> VertexOutput {
+fn skinnedComputeMain(@builtin(global_invocation_id) globalId: vec3u) {
   let index = globalId.x;
   if (index >= vertex.count) { return; }
 
