@@ -75,7 +75,7 @@ const msaaRenderPass = commandEncoder.beginRenderPass({
         view: msaaDepthTarget.createView(),
         depthClearValue: 1.0,
         depthLoadOp: 'clear',
-        depthStoreOp: 'discard',
+        depthStoreOp: 'store',
     }
 });
 
@@ -99,6 +99,9 @@ context.configure({
     format: navigator.gpu.getPreferredCanvasFormat(),
     // Canvas context textures default to a usage of RENDER_ATTACHMENT
 });
+
+// Later in the frame loop
+const colorTexture = context.getCurrentTexture();
 ```
 
 Alternatively you can also resolve to a texture you create normally via `device.createTexture()`, it just won't show up in the canvas.
@@ -115,14 +118,12 @@ const colorTexture = context.configure({
 Then you provide a texture view for that texture as the `resolve` argument of one of the `colorTargets`.
 
 ```js
-const outputTexture = context.getCurrentTexture();
-
 const commandEncoder = device.createCommandEncoder();
 const msaaRenderPass = commandEncoder.beginRenderPass({
     label: `Multisample Render Pass with Resolve`,
     colorTargets: [{
         view: msaaColorTarget.createView(),
-        resolve: outputTexture.createView(),  // <-- This is the new bit!
+        resolve: colorTexture.createView(),  // <-- This is the new bit!
         clearValue: [0, 0, 0, 0],
         loadOp: 'clear',
         storeOp: 'store`, // Oops! We'll talk about why this isn't good in a bit.
@@ -144,8 +145,113 @@ device.queue.submit([commandEncoder.finish()]);
 
 What this does is wait till the end of the render pass, then copies the contents of the multisample `view` texture over to the single sample `resolve` texture. As it does so, it averages the color value of the 4 samples in the multisample texture and writes that averaged value into the single sampled texture. This is what gives the final image it's nice, antialiased appearance!
 
-TODO:
+TODO: Image example.
 
 And that's it! Easy, right?
 
-## 
+## Taking advantage of the tile cache
+
+Not so fast! While the above code works it can be done better. Specifically, it can be updated to take advantage of the architecture of GPUs that use Tile-Based Rendering (TBR), like many mobile GPUs.
+
+The full details of how tile-based rendering works are out of scope for this article, but the important part to understand is that rather than rendering all the pixels affected by a single draw call at once, then moving on to the next draw call, tile-based renderers process all of the draws that affects a small rectangle (tile) of the output texture at once, then move on to the next tile and do it again.
+
+The benefit of this is that the GPU can handle all of the drawing in a small, very fast chunk of cache memory which only needs to be written out to the output texture (stored in slower VRAM) when the tile is finished.
+
+How does that affect multisampling?
+
+// TODO
+
+```js
+const commandEncoder = device.createCommandEncoder();
+const msaaRenderPass = commandEncoder.beginRenderPass({
+    label: `Multisample Render Pass with Resolve`,
+    colorTargets: [{
+        view: msaaColorTarget.createView(),
+        resolve: colorTexture.createView(),
+        clearValue: [0, 0, 0, 0],
+        loadOp: 'clear',
+        storeOp: 'discard`, // <-- Updated. Much better for peformance!
+    }],
+    depthStencilAttachment: {
+        view: msaaDepthTarget.createView(),
+        depthClearValue: 1.0,
+        depthLoadOp: 'clear',
+        depthStoreOp: 'discard', // <-- Works for depth/stencil too!
+    }
+});
+
+msaaRenderPass.usePipeline(msaaRenderPipeline);
+msaaRenderPass.draw(3);
+
+msaaRenderPass.end();
+device.queue.submit([commandEncoder.finish()]);
+```
+
+Note that setting the `storeOp` to `'discard'` doesn't prevent the resolve from happening! `colorTexture` will still contain the final result of the render pass. It just tells the GPU that you don't care about making sure that the content of the MSAA texture is preserved.
+
+Similarly, by using a `loadOp` of `'clear'` instead of `'load'` we are telling the GPU that we don't need to spend precious bandwidth pulling data out of the multisample texture before we start rendering, it can just initialize the cache to the given color. Oh, and the same concept applies to the depth stencil texture as well!
+
+Taken together these load/store operations eliminate the bandwidth needed to copy the tile results to and from the multisampled texture. And since it's only taking time to copy out the single-sampled results, that makes the multisampled approach not "cost" much more than doing things single-sampled in the first place.
+
+Of course, there are some rendering techniques that will require you to load or preserve the MSAA texture contents, and in that case you'll just have to eat the additional overhead (or use single sampling). The important part is to make sure you're not using `'load'` or `'store'` if you don't need to, because at that point you're introducing significant overhead on mobile (where you can afford it the least!) for no good reason.
+
+## Using Transient Attachments
+
+You may be asking yourself "wait a second, if we're not _loading_ the contents from the MSAA texture, and we're not _storing_ the contents to the MSAA texture, and the actual processing is being done in the cache... why do I need to allocate the memory for the MSAA texture in the first place?
+
+![Why do we even HAVE that texture?](./media/why-texture.gif)
+
+Good question! And the answer is: You don't! ...*On tile-based renderers.* On your typical desktop GPU you still need some memory allocated for the driver to use as a scratch pad, even if you don't care about the results being stored later. Of course, this being the web we want to ideally implement something that works for both scenarios.
+
+That's where *transient attachments* come in! A transient attachment is a texture that we create with a hint to the GPU that we don't care about it's contents and will only ever use it as a render attachemnt. In WebGPU that looks like this:
+
+```js
+const msaaColorTarget = device.createTexture({
+    label: `Transient Multisample Color Texture`,
+    format: navigator.gpu.getPreferredCanvasFormat(),
+    usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TRANSIENT_ATTACHMENT, // <-- New Usage!
+    sampleCount: 4,
+    size: { width: 1024, height: 1024 }
+});
+
+const msaaDepthTarget = device.createTexture({
+    label: `Transient Multisample Depth Texture`,
+    format: `depth24plus`,
+    usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TRANSIENT_ATTACHMENT, // <-- Works for depth/stencil too!
+    sampleCount: 4,
+    size: { width: 1024, height: 1024 }
+});
+```
+
+This basically tells the GPU "You don't have to allocate memory for this if you don't want to!" And on tile-based renderers it probably wont! You're still likely to get an allocation on desktop GPUs, but that's OK because they've usually got more power/memory to spare.
+
+As you might expect there are some limitations that come with using a transient texture. You _must_ pair the `TRANSIENT_ATTACHMENT` usage with the `RENDER_ATTACHMENT` usage and nothing else. (Which makes sense. You can't sample from texture memory that may not be there, right?) And when using the texture as a render pass attachment you _must_ use `loadOp: 'clear'` and `storeOp: 'discard'` (or the depth/stencil equivalents). These rules will be enforced by WebGPU's internal validation, but given that's what we were already doing in our prior example it shouldn't be a problem!
+
+Now the GPU can keep all the multisampled targets in tiled memory _and_ we don't have to waste texture memory! Easy win!
+
+> **Compatibility Note**: Transient attachments are a core part of the WebGPU spec, and so you should eventually be able to use them everywhere. They were a relatively late addition to the spec, however, so at the time of this writing they are implemented in Chrome (shipped in v146), but haven't been added to Firefox ([issue](https://bugzilla.mozilla.org/show_bug.cgi?id=2005061)) or Safari. They will both implement transient attachments in a future release.
+>
+> In the meantime, you can easily "polyfill" transient textures on those browser with a single statement at the top of your code:
+>
+> ```js 
+> // Ensure TRANSIENT_ATTACHMENT can be used on unsupported browsers.
+> GPUTextureUsage.TRANSIENT_ATTACHMENT = GPUTextureUsage.TRANSIENT_ATTACHMENT ?? 0;
+> ```
+>
+> This works because `TRANSIENT_ATTACHMENT` is a just an optimization hint, and it's perfectly fine if the memory is actually allocated. This doesn't provide the associated validation, however, so be sure to test on a browser that does support transient attachments first.
+
+## Depth Resolve
+
+There's a funny edge case with using MSAA that may not be obvious at first. While many render techniques don't need to preserve the contents of the depth buffer once the render pass is complete, there's also plenty of techniques that require it! [Screen space ambient occlusion](https://en.wikipedia.org/wiki/Screen_space_ambient_occlusion) is a good example, as it relies on both the scene depth and normals. For any of your color targets, such as a texture containg the scene normals, you simply need to provide the [GPURenderPassColorAttachment](https://gpuweb.github.io/gpuweb/#dictdef-gpurenderpasscolorattachment) a `resolve` texture view, as shown above. Easy!
+
+But you'll likely find out very quickly that there's no such `resolve` field on the [`GPURenderPassDepthStencilAttachment`](https://gpuweb.github.io/gpuweb/#dictdef-gpurenderpassdepthstencilattachment)! So how do you get that depth data into a form where you can sample from it?
+
+There's a couple of approaches that you can use here. First off, it's worth noting that all of these techniques require that you `'store'` the depth\stencil contents, which means that you can't use `TRANSIENT_ATTACHMENT` for those attachments and you'll be paying the cost for storing out the full multisample texture. As established above this can be significantly more expensive on tile-based renderers vs. using `'discard'`, so keep that in mind and budget your rendering accordingly.
+
+// TODO: Manual resolve to a single sample texture.
+
+Alternatively, you could use the multisample texture directly, skipping the intermediate "resolved" texture produced above, but this is likely to be most effective in a scenario where you're only loading each depth fragment once or twice for the technique. If you're likely to be sampling the same depth values multiple times you should consider resolving to a single-sample texture first.
+
+
+
+
