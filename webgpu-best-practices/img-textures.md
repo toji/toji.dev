@@ -2,10 +2,14 @@
 layout: page
 title: WebGPU &lt;img&gt;, &lt;canvas&gt;, and &lt;video&gt; Textures
 subtitle: Best practices
-date: 2023-06-01
+date: 2026-04-08
 menubar_toc: true
 comments: true
 ---
+
+## Update Notice!
+
+This was originally written in 2023, and fortunately the WebGPU spec has continued evolving since then! Specifically, the ability to use an `HTMLImageElement` as a source for `copyExternalImageToTexture()` was added, removing the need for a lot of the code that was previously in this article. The page below has been updated to reflect the best practices as of early 2026.
 
 ## Introduction
 
@@ -25,27 +29,32 @@ function webGLTextureFromImageUrl(gl, url, loadedCallback) {
 }
 ```
 
-But if you go searching through the [WebGPU spec](https://gpuweb.github.io/gpuweb/), you'll notice very quickly that there's no mention of `HTMLImageElement` anywhere, nor is there anything about how to generate mipmaps. So how exactly do we load images as textures with WebGPU, and preferably how do we do it as efficiently as possible? That's what this doc is here to tell you!
+But if you go searching through the [WebGPU spec](https://gpuweb.github.io/gpuweb/), you'll notice that loading textures from an images is a little more indirect and there isn't anything about how to generate mipmaps. So how exactly do we load images as textures with WebGPU, and preferably how do we do it as efficiently as possible? That's what this doc is here to tell you!
 
 ## Prefer compressed formats when possible!
 
 Before we begin, it is worth mentioning that, while not the focus of this document, you should **strongly** consider using compressed texture formats when doing graphics work on the web, and specifically a format that can be transcoded to support multiple different platforms like [Basis Universal](https://github.com/BinomialLLC/basis_universal). Compressed formats take up significantly less space on the GPU, upload faster, can help with caching performance, and frequently can be delivered in a file about the same size as a JPG. If you are in control of your application's assets there is very little reason not to use compressed textures.
 
-The mechanics of how to load compressed textures is beyond the scope of this document (I'll probably write a separate doc about it), but you can use libraries such as my [Web Texture Tool library](https://github.com/toji/web-texture-tool) to handle both compressed and uncompressed textures seamlessly and efficiently.
+The mechanics of how to load compressed textures is beyond the scope of this document (I'll probably write a separate doc about it), but you can reference my [Web Texture Tool library](https://github.com/toji/web-texture-tool) to see how to handle compressed textures seamlessly and efficiently.
 
-That being said, there are still plenty of valid reasons for needing to load uncompressed images. For example, you may not have full control over where your assets are coming from. If you were displaying a gallery of images from another page, for example, you'll need to consume the images in whatever format they were originally posted. Similarly you may have a page that displays user-supplied 3D models which have embedded images in them for textures. In these cases there are still a variety of best practices to follow to handle the textures as efficiently as possible, which is the focus of this document.
+That being said, there are plenty of valid reasons for needing to load web images. For example, you may not have full control over where your assets are coming from. If you were displaying a gallery of images from another page, for example, you'll need to consume the images in whatever format they were originally posted. Similarly you may have a page that displays user-supplied 3D models which have embedded images in them for textures.
+
+In these cases, you can take advantage of texture compression using a library like [spark.js](https://ludicon.com/sparkjs/), which transcodes web image formats into compressed GPU formats in realtime with great quality!
+
+But let's say that you _still_ want to upload web images as uncompressed textures. Perhaps you need completely lossless images or don't want to take an external library dependency. In these cases there are still a variety of best practices to follow to handle the textures as efficiently as possible, which is the focus of this document.
 
 ## Comparing `<img>` formats
 
-For this document we're focusing on loading browser-native image formats as textures. A browser-native image is anything that you can display using an `HTMLImageElement` (`<img>` tag), which includes JPG, PNG, WEBP, GIF, BMP, and possibly more depending on your browser.
+For this document we're focusing on loading browser-native image formats as textures. A browser-native image is anything that you can display using an `HTMLImageElement` (`<img>` tag), which includes JPG, PNG, WEBP, AVIF, GIF, BMP, and possibly more depending on your browser.
 
-Of these, it's only really practical to use JPG, PNG, and WEBP for graphics work.
+Of these, it's only really practical to use AVIF, WEBP, PNG, and JPG for graphics work.
 
- - **WEBP** Should be preferred for its small size, its ability to be lossy or lossless, and transparency support. Previously it wasn't as widely supported as the other image formats, but any browser that supports WebGPU will have WEBP support as well.
+ - **AVIF** Often will achive the smallest file sizes, can be lossy or lossless, and has transparency and even animation support! The only real downside is that it can take a bit longer to encode and decode vs. something like WebP, and not all image tools may support it. While it's the newest format in this list, any browser that supports WebGPU will have AVIF support as well.
+ - **WEBP** In many cases won't match AVIF in terms of file size, but still a solid choice! Supports lossy or lossless, transparency, and animation. May have more tooling support due to being around longer than AVIF.
  - **PNG** Will frequently have bigger file sizes but is lossless, supports transparency, and has widespread support in tools.
- - **JPG** doesn't support transparency and is similar in size to WEBP files, but it's the most ubiquitous image format around.
+ - **JPG** only does lossy images, doesn't support transparency, and usually clocks in with larger sizes than WebP or AVIF files, but it's the most ubiquitous image format around and can be opened and edited by pretty much anything.
 
-**GIF**s may seem attractive for their animation support, but the quality is very poor, especially when compared to the file size. Also, there is no programmatic way to control which GIF frame will be copied to the texture, so using it for an animated texture is not practical. Use video formats for this use case instead.
+**GIF**s may seem attractive for their animation support, but the quality is very poor, especially when compared to the file size. Also, there is no programmatic way to control which frame of an animated image will be copied to the texture, so using any of these formats for an animated texture is not practical. Use video formats for this use case instead.
 
 **BMP** has no redeeming qualities whatsoever. You technically _can_ load them as textures, but just... don't.
 
@@ -53,7 +62,7 @@ Of these, it's only really practical to use JPG, PNG, and WEBP for graphics work
 
 So, you have an image in one of the above formats, how do you make a WebGPU texture out of it?
 
-Rather than accepting an `HTMLImageElement` directly, WebGPU is designed to accept an [`ImageBitmap`](https://developer.mozilla.org/en-US/docs/Web/API/ImageBitmap) instead. This can help with the performance of your page, because creating an `ImageBitmap` causes the image data to be decoded into a GPU-friendly format, and it does so off the main thread.
+While it can accept an `HTMLImageElement` directly, you can frequently get better results by loading as an [`ImageBitmap`](https://developer.mozilla.org/en-US/docs/Web/API/ImageBitmap) instead. This can help with the performance of your page, because creating an `ImageBitmap` causes the image data to be decoded into a GPU-friendly format, and it does so off the main thread.
 
 Once you have an `ImageBitmap`, you can use it to set the contents of a WebGPU texture through the [`device.queue.copyExternalImageToTexture()`](https://gpuweb.github.io/gpuweb/#dom-gpuqueue-copyexternalimagetotexture) method.
 
@@ -88,29 +97,27 @@ async function webGPUTextureFromImageUrl(gpuDevice, url) { // Note that this is 
 
 ## Creating a texture from an `HTMLImageElement` (`<img>` tag)
 
-If you _do_ have an image element, though, it's trivial to get the `ImageBitmap` using `createImageBitmap()` as discussed above. The biggest quirk is that you either need to be sure that the image has finished loading previously OR wait for it to finish, which is a bit clunky:
+If you _do_ have an image element, though, `copyExternalImageToTexture()` now supports that as a source as well. The biggest quirk is that you should use the `naturalWidth` and `naturalHeight` properties of the element when creating the texture. Don't use the `width` and `height` because those are used to control page composition and may not match the content of the image.
 
 ```js
-// Assumes the
-async function webGPUTextureFromImageElement(gpuDevice, imgElement) {
-  if (imgElement.complete) {
-    const imgBitmap = await createImageBitmap(imgElement);
-    return await webGPUTextureFromImageBitmapOrCanvas(gpuDevice, imgBitmap);
-  } else {
-    // If the image isn't loaded yet we'll wrap the load/error events in a promise to keep the
-    // function interface consistent.
-    return new Promise((resolve, reject) => {
-      imgElement.addEventListener('load', async () => {
-        const imgBitmap = await createImageBitmap(imgElement);
-        return await webGPUTextureFromImageBitmapOrCanvas(gpuDevice, imgBitmap);
-      });
-      imgElement.addEventListener('error', reject);
-    });
+function webGPUTextureFromImageElement(gpuDevice, imgElement) {
+  const textureDescriptor = {
+    // 
+    size: { width: imgElement.naturalWidth, height: imgElement.naturalHeight },
+    format: 'rgba8unorm',
+    usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST
   };
+  const texture = gpuDevice.createTexture(textureDescriptor);
+
+  gpuDevice.queue.copyExternalImageToTexture({ source: imgElement }, { texture }, textureDescriptor.size);
+
+  return texture;
 }
 ```
 
-One caveat to be aware of, though, is that images used by an `HTMLImageElement` may make different assumptions about how they are going to be used which can cause the decode step done by `createImageBitmap()` to be performed synchronously. (This is the current behavior in Chrome.) As a result, **if you can load the image via a URL/`Blob` you should always prefer that.**
+One caveat to be aware of, though, is that images used by an `HTMLImageElement` may make different assumptions about how they are going to be used which can cause the decode that happens when uploading to be performed synchronously. (This is the current behavior in Chrome.) Also, if you attach the image element to the document the decode that it does is not guaranteed to be re-usable when uploading to a texture, so you might end up decoding the image twice in that case.
+
+As a result, **if you can load the image via a URL/`Blob` you should always prefer that.**
 
 ## Real world application: glTF
 
@@ -146,7 +153,7 @@ async function webGPUTextureFromGLTFImage(gpuDevice, gltfJson, imageIndex) {
     );
   }
   const imgBitmap = await createImageBitmap(blob);
-  return webGPUTextureFromImageBitmap(gpuDevice, imgBitmap);
+  return webGPUTextureFromImageBitmapOrCanvas(gpuDevice, imgBitmap);
 }
 ```
 
@@ -154,9 +161,7 @@ async function webGPUTextureFromGLTFImage(gpuDevice, gltfJson, imageIndex) {
 
 Another common place you may want to pull texture contents from is a Canvas (either an `HTMLCanvasElement` or `OffscreenCanvas`). Using the contents of a `2d` canvas as a texture can be a great way to generate textures programmatically or render text, for example.
 
-Canvases are already able to be passed to `createImageBitmap()`, so at first glance it may seem like the best way to create an image from a canvas is to once again get an `ImageBitmap` and use the same approach as above. We can actually take a shortcut in this case, however!
-
-The [`GPUImageCopyExternalImage dictionary`](https://gpuweb.github.io/gpuweb/#dictdef-gpuimagecopyexternalimage) passed into `copyExternalImageToTexture()` can accept an `HTMLCanvasElement` or `OffscreenCanvas` directly in addition to an `ImageBitmap`, which allows the content of those canvases to be copied into the texture without the need to wait for `createImageBitmap()` to complete. In fact, we can use the `webGPUTextureFromImageBitmapOrCanvas()` we defined above completely unchanged!
+The [`GPUImageCopyExternalImage dictionary`](https://gpuweb.github.io/gpuweb/#dictdef-gpuimagecopyexternalimage) passed into `copyExternalImageToTexture()` can accept an `HTMLCanvasElement` or `OffscreenCanvas` directly, just like `ImageBitmap` and `HTMLImageElement`, which allows the content of those canvases to be copied into the texture without the need to wait for `createImageBitmap()` to complete. In fact, we can use the `webGPUTextureFromImageBitmapOrCanvas()` we defined above completely unchanged!
 
 ```js
 // Note: Unlike the other methods above this call doesn't need to be async.
@@ -336,7 +341,7 @@ gl.generateMipmap(GL.TEXTURE_2D);
 
 And, done! Moving on! With WebGPU, on the other hand things are... significantly less simple.
 
-WebGPU requires you to explicitly set every mipmap level of each texture. For some texture types, like compressed textures, it's common to store each mip level separately in the file itself, which makes it relatively easy to populate the full mip chain, but when your image source is a JPEG/PNG/Canvas/etc you're stuck either not using mipmapping at all or generating the mipmaps yourself at runtime.
+WebGPU requires you to explicitly set every mipmap level of each texture. For some texture types, like compressed textures, it's common to store each mip level separately in the file itself, which makes it relatively easy to populate the full mip chain, but when your image source is a Web Image/Canvas/etc you're stuck either not using mipmapping at all or generating the mipmaps yourself at runtime.
 
 There's a myriad of ways that you can choose to generate mipmaps, with some of the fancier native libraries going so far as to do single-pass, compute shader-based, custom filtered downsampling. Chances are, though, if you simply want your textures to not sparkle when you move around your scene you'll be just fine with a much simpler solution.
 
