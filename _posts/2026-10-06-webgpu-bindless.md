@@ -253,8 +253,8 @@ full details.
 
 ## Bindless in practice
 
-Bindless texturing can be used in Google Chrome right now, but requires that you enable
-"WebGPU Developer Features" in Chrome's [about:flags](chrome://flags/#enable-webgpu-developer-features)
+Bindless texturing can be used in Google Chrome right now, but it requires that you enable
+"Unsafe WebGPU Support" in Chrome's [about:flags](chrome://flags/#enable-unsafe-webgpu)
 page. Please note that this is for development only and you generally should not do your day-to-day
 browsing with that flag enabled.
 
@@ -263,7 +263,7 @@ achieve the effects it wants, I created [emojigraffiti.com](https://emojigraffit
 you in a simple "gallery" environment with a spray can that can draw any emoji you want (and a few
 extras!) onto the walls, giving you a canvas to decorate as you see fit!
 
-// Image Goes Here
+![Emoji Graffiti](/blog/media/emoji-graffiti.png)
 
 In terms of rendering, the emoji "tags" are drawn as projected decals on the scene geometry,
 rendering as part of the room geometry itself rather than as a separate decal mesh. This has several
@@ -281,7 +281,7 @@ the clear path to enabling such a flexible use case!
 
 ## Texture arrays as an imperfect fallback
 
-If you visit emojigraffiti.com without enabling "WebGPU Developer Features" you'll notice that it
+If you visit emojigraffiti.com without enabling "Unsafe WebGPU Support" you'll notice that it
 still renders correctly. Given what I just said about it being impractical without bindless you
 might be wondering how it still works?
 
