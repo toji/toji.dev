@@ -11,7 +11,7 @@ own pages, and see a live example of it in action at [emojigraffiti.com](https:/
 
 <!--more-->
 
-## What is Bindless?
+## The traditional binding model
 
 Typically when developing with WebGPU you choose which resources (textures, buffers, samplers) can be accessed by the
 current render pipeline by placing them into [Bind Groups](https://gpuweb.github.io/gpuweb/#gpubindgroup). The bindings
@@ -24,8 +24,6 @@ entire scene containing common data like camera uniforms or environment maps, an
 material that just contains the textures or matricies used by that object. Unfortunately creating and setting bind
 groups has some overhead, and while effective use of instancing and other data-packing tricks can reduce the total
 number of bindings needed, it's still something that needs to be handled carefully by any efficient renderer.
-
-## "Bindful" vs Bindless code
 
 A (very) simplified snippet of a renderer using a bind groups would look something like this:
 
@@ -118,6 +116,8 @@ for (const mesh of meshes) {
 
 pass.end();
 ```
+
+## Using Bindless
 
 WebGPU's upcoming bindless texturing model, on the other hand, allows you to throw most or all of the textures needed by
 an entire scene into one big [Resource Table](https://github.com/gpuweb/gpuweb/blob/main/proposals/bindless.md#resource-tables-creation)
@@ -243,7 +243,6 @@ any number of meshes in the scene and it's nearly impossible to predict in advan
 that you need to have access to the textures for any mesh at any time, which is what bindless
 texture sampling delivers.
 
-
 > In case it's not obvious: This is not a comprehensive overview of how `GPUResourceTable`s work.
 > There are, for example, other ways to manage the resources in the table besides `insert()` that
 > allow more flexibility while requiring more care on the part of the developer. See the
@@ -252,8 +251,9 @@ texture sampling delivers.
 
 ## Bindless in practice
 
-Bindless texture sampling can be used in Google Chrome right now, but it requires that you enable
-"Unsafe WebGPU Support" in Chrome's [about:flags](chrome://flags/#enable-unsafe-webgpu)
+Bindless texture sampling is available for testing in Google Chrome on Windows, Linux, and Android.
+MacOS support will be coming soon. Since it is still considered experimental, it requires that you
+enable the "Unsafe WebGPU Support" flag in Chrome's [about:flags](chrome://flags/#enable-unsafe-webgpu)
 page. Please note that this is for development only and you generally should not do your day-to-day
 browsing with that flag enabled.
 
